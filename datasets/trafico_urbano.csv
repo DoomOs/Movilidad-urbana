@@ -1,0 +1,151 @@
+id,origen,destino,ciudad,distancia_km,trafico,clima,hora,dia_semana,tiempo_estimado_min,fecha_registro
+1,Av. Universidad,Blvd. Hilario Medina,León,3.39,Alto,Nublado,10,Martes,8.9,2024-09-04
+2,Av. Colón,Calle 60,Mérida,7.44,Bajo,Lluvia Ligera,8,Sábado,5.81,2024-05-19
+3,Av. Universidad,Blvd. Hilario Medina,León,4.15,Muy Alto,Nublado,19,Miércoles,15.85,2024-10-26
+4,Blvd. Ortiz Mena,Av. Tecnológico,Juárez,9.64,Medio,Despejado,13,Jueves,16.06,2024-02-05
+5,Av. Revolución,Blvd. Gustavo Aubanel Vallejo,Tijuana,7.65,Medio,Lluvia Intensa,21,Martes,9.18,2024-04-03
+6,Blvd. Díaz Ordaz,Av. Constitución,Monterrey,4.95,Muy Alto,Nublado,18,Miércoles,18.74,2024-01-14
+7,Camino Arenero,Av. Moctezuma,Zapopan,6.59,Bajo,Lluvia Intensa,0,Jueves,5.68,2024-08-17
+8,Blvd. 5 de Mayo,Av. Juárez,Puebla,10.3,Muy Alto,Despejado,18,Martes,36.82,2024-02-08
+9,Av. Universidad,Av. Insurgentes Sur,Ciudad de México,3.45,Alto,Lluvia Ligera,7,Jueves,6.02,2024-02-09
+10,Calzada Independencia,Av. López Mateos,Guadalajara,6.74,Alto,Lluvia Ligera,12,Sábado,14.53,2024-04-28
+11,Av. Moctezuma,Blvd. Puerta de Hierro,Zapopan,3.72,Medio,Lluvia Intensa,13,Lunes,4.18,2024-04-13
+12,Av. 14 Oriente,Vía Atlixcáyotl,Puebla,4.58,Alto,Nublado,12,Sábado,11.77,2024-08-19
+13,Av. Heroico Colegio Militar,Av. Plutarco Elías Calles,Juárez,7.64,Alto,Despejado,17,Jueves,21.18,2024-05-27
+14,Av. Revolución,Av. Internacional,Tijuana,6.68,Medio,Lluvia Intensa,18,Domingo,5.83,2024-05-28
+15,Blvd. 5 de Mayo,Av. 14 Oriente,Puebla,1.82,Alto,Nublado,13,Sábado,4.53,2024-01-09
+16,Viaducto Miguel Alemán,Eje Central Lázaro Cárdenas,Ciudad de México,3.59,Alto,Lluvia Ligera,12,Sábado,7.36,2024-08-16
+17,Periférico Manuel Bertrán,Av. Jacinto Canek,Mérida,2.91,Medio,Lluvia Ligera,0,Viernes,4.84,2024-03-17
+18,Av. Las Américas,Av. Tecnológico,Juárez,2.09,Bajo,Despejado,2,Sábado,2.62,2024-03-09
+19,Blvd. Kukulcán,Periférico Manuel Bertrán,Mérida,7.36,Alto,Nublado,13,Sábado,18.17,2024-05-08
+20,Av. Internacional,Blvd. Gustavo Aubanel Vallejo,Tijuana,14.57,Muy Alto,Lluvia Intensa,7,Viernes,36.44,2024-09-07
+21,Av. Sendero,Av. Constitución,Monterrey,15.01,Alto,Lluvia Ligera,7,Martes,27.17,2024-01-03
+22,Blvd. 5 de Mayo,Av. 14 Oriente,Puebla,3.57,Muy Alto,Despejado,7,Viernes,13.07,2024-05-01
+23,Av. Lincoln,Av. Las Torres,Monterrey,13.48,Alto,Lluvia Ligera,13,Viernes,32.12,2024-12-15
+24,Av. Moctezuma,Camino Arenero,Zapopan,8.72,Muy Alto,Lluvia Ligera,7,Martes,28.18,2024-03-14
+25,Blvd. Juan José Torres Landa,Blvd. Adolfo López Mateos,León,7.17,Bajo,Despejado,4,Jueves,10.06,2024-10-28
+26,Av. Tecnológico,Periférico Ramón Corona,Juárez,7.43,Alto,Lluvia Ligera,14,Viernes,18.29,2024-08-23
+27,Av. Juárez,Av. Forjadores de Puebla,Puebla,16.36,Bajo,Nublado,5,Domingo,18.92,2024-08-27
+28,Blvd. 5 de Mayo,Av. Juárez,Puebla,9.49,Alto,Lluvia Intensa,20,Jueves,13.24,2024-09-10
+29,Anillo Periférico,Periférico Sur,Guadalajara,19.15,Medio,Lluvia Ligera,19,Sábado,23.07,2024-12-15
+30,Av. Venustiano Carranza,Eje 103,San Luis Potosí,9.96,Medio,Despejado,10,Lunes,15.82,2024-11-27
+31,Blvd. Ortiz Mena,Av. Tecnológico,Juárez,11.11,Alto,Despejado,9,Lunes,26.74,2024-03-06
+32,Blvd. Diego Zapata,Av. Venustiano Carranza,San Luis Potosí,9.94,Muy Alto,Nublado,8,Jueves,37.32,2024-03-26
+33,Av. Federalismo,Calzada Independencia,Guadalajara,2.84,Bajo,Nublado,22,Viernes,3.61,2024-06-06
+34,Av. Itzáes,Av. Colón,Mérida,4.4,Muy Alto,Lluvia Intensa,7,Viernes,11.46,2024-05-10
+35,Salida a Matehuala,Blvd. Diego Zapata,San Luis Potosí,7.74,Bajo,Despejado,3,Sábado,9.31,2024-01-01
+36,Av. Gonzalitos,Blvd. Díaz Ordaz,Monterrey,2.03,Bajo,Nublado,4,Sábado,2.5,2024-10-27
+37,Blvd. Kukulcán,Av. Jacinto Canek,Mérida,10.64,Medio,Lluvia Ligera,19,Sábado,12.52,2024-03-14
+38,Av. Moctezuma,Periférico Norte,Zapopan,2.48,Bajo,Lluvia Ligera,2,Sábado,2.99,2024-04-09
+39,Av. López Mateos,Av. Juárez,Guadalajara,13.16,Bajo,Nublado,4,Domingo,18.33,2024-01-24
+40,Periférico Norte,Blvd. Puerta de Hierro,Zapopan,7.69,Alto,Despejado,12,Viernes,22.03,2024-04-05
+41,Camino Arenero,Periférico Norte,Zapopan,12.8,Alto,Despejado,15,Viernes,35.96,2024-08-22
+42,Salida a Matehuala,Blvd. Antonio Rocha Cordero,San Luis Potosí,9.54,Alto,Nublado,15,Lunes,24.98,2024-08-06
+43,Av. Federalismo,Calzada del Ejército,Guadalajara,7.8,Muy Alto,Despejado,17,Miércoles,37.69,2024-12-11
+44,Periférico Manuel Bertrán,Blvd. Kukulcán,Mérida,10.22,Bajo,Nublado,3,Miércoles,12.43,2024-11-16
+45,Blvd. Manuel J. Clouthier,Av. Morones Prieto,Monterrey,7.54,Medio,Nublado,21,Viernes,14.24,2024-06-10
+46,Blvd. Manuel Ávila Camacho,Blvd. Hilario Medina,León,7.51,Medio,Nublado,13,Jueves,11.8,2024-04-01
+47,Blvd. Manuel Ávila Camacho,Calzada Las Américas,León,11.09,Medio,Despejado,11,Miércoles,16.26,2024-04-07
+48,Av. Universidad,Calzada Las Américas,León,5.97,Alto,Lluvia Ligera,13,Martes,14.61,2024-08-04
+49,Calzada Las Américas,Blvd. Juan José Torres Landa,León,6.56,Alto,Despejado,14,Miércoles,17.77,2024-07-19
+50,Av. Moctezuma,Blvd. Puerta de Hierro,Zapopan,4.27,Bajo,Lluvia Ligera,2,Jueves,4.38,2024-04-10
+51,Av. Vallarta,Camino Arenero,Zapopan,12.57,Bajo,Lluvia Ligera,3,Domingo,13.94,2024-05-01
+52,Blvd. Diego Zapata,Salida a Matehuala,San Luis Potosí,5.11,Muy Alto,Despejado,19,Jueves,20.73,2024-06-05
+53,Periférico Manuel Bertrán,Av. Colón,Mérida,11.74,Muy Alto,Despejado,17,Viernes,62.56,2024-12-11
+54,Av. Colón,Av. Itzáes,Mérida,5.98,Alto,Nublado,18,Sábado,13.59,2024-06-13
+55,Camino Arenero,Periférico Norte,Zapopan,10.28,Alto,Lluvia Ligera,18,Lunes,18.47,2024-03-12
+56,Periférico Manuel Bertrán,Av. Itzáes,Mérida,4.57,Bajo,Nublado,21,Martes,5.5,2024-07-02
+57,Blvd. Ortiz Mena,Av. Plutarco Elías Calles,Juárez,3.56,Alto,Nublado,12,Lunes,9.53,2024-09-21
+58,Av. Universidad,Eje Central Lázaro Cárdenas,Ciudad de México,4.36,Bajo,Despejado,2,Miércoles,5.5,2024-07-24
+59,Av. Patria,Calzada del Ejército,Guadalajara,3.46,Medio,Despejado,21,Sábado,7.08,2024-09-01
+60,Blvd. Marcelino García Barragán,Av. Patria,Guadalajara,9.05,Medio,Lluvia Ligera,14,Domingo,12.0,2024-04-02
+61,Viaducto Miguel Alemán,Eje 4 Sur,Ciudad de México,15.52,Alto,Lluvia Ligera,20,Viernes,27.6,2024-04-26
+62,Av. López Mateos,Calzada del Ejército,Guadalajara,16.6,Alto,Despejado,16,Domingo,48.76,2024-01-23
+63,Blvd. Manuel Ávila Camacho,Av. Universidad,León,5.43,Muy Alto,Nublado,18,Jueves,20.18,2024-12-17
+64,Calzada Independencia,Blvd. Marcelino García Barragán,Guadalajara,7.41,Bajo,Lluvia Intensa,23,Sábado,6.45,2024-07-24
+65,Eje 103,Blvd. Diego Zapata,San Luis Potosí,1.75,Alto,Despejado,13,Viernes,4.52,2024-12-17
+66,Blvd. Diego Zapata,Salida a Matehuala,San Luis Potosí,5.01,Bajo,Despejado,1,Viernes,6.76,2024-10-19
+67,Calzada del Ejército,Periférico Sur,Guadalajara,14.4,Alto,Nublado,16,Domingo,35.27,2024-03-17
+68,Blvd. Ortiz Mena,Av. Tecnológico,Juárez,11.82,Medio,Nublado,11,Miércoles,17.99,2024-11-16
+69,Av. Lincoln,Av. Constitución,Monterrey,8.09,Medio,Lluvia Ligera,16,Viernes,10.03,2024-05-06
+70,Circuito Juan Pablo II,Av. Forjadores de Puebla,Puebla,2.59,Bajo,Lluvia Intensa,8,Sábado,1.54,2024-06-03
+71,Periférico Norte,Camino Arenero,Zapopan,9.85,Bajo,Nublado,4,Jueves,13.26,2024-12-17
+72,Circuito Juan Pablo II,Av. Juárez,Puebla,13.42,Medio,Despejado,21,Lunes,28.04,2024-04-17
+73,Calzada Independencia,Blvd. Marcelino García Barragán,Guadalajara,6.87,Medio,Lluvia Ligera,11,Miércoles,9.71,2024-07-12
+74,Blvd. Adolfo López Mateos,Blvd. Manuel Ávila Camacho,León,4.7,Bajo,Despejado,21,Martes,6.28,2024-03-13
+75,Periférico Manuel Bertrán,Av. Jacinto Canek,Mérida,4.06,Bajo,Lluvia Intensa,0,Miércoles,3.79,2024-09-15
+76,Blvd. Gustavo Aubanel Vallejo,Av. Internacional,Tijuana,14.84,Muy Alto,Despejado,8,Miércoles,55.57,2024-10-14
+77,Blvd. Manuel Ávila Camacho,Av. Chapultepec,Ciudad de México,10.92,Alto,Nublado,20,Viernes,23.98,2024-07-09
+78,Blvd. Agua Caliente,Vía Rápida Oriente,Tijuana,14.68,Bajo,Nublado,0,Martes,18.86,2024-07-13
+79,Av. Federalismo,Av. López Mateos,Guadalajara,8.11,Alto,Lluvia Intensa,14,Lunes,14.46,2024-11-06
+80,Av. Plutarco Elías Calles,Av. Tecnológico,Juárez,8.62,Bajo,Lluvia Ligera,22,Martes,9.67,2024-10-26
+81,Eje 4 Sur,Eje Central Lázaro Cárdenas,Ciudad de México,19.92,Alto,Lluvia Ligera,9,Viernes,37.43,2024-12-01
+82,Periférico Sur,Av. Patria,Guadalajara,14.35,Bajo,Despejado,10,Sábado,17.07,2024-02-04
+83,Viaducto Miguel Alemán,Eje Central Lázaro Cárdenas,Ciudad de México,3.12,Bajo,Despejado,7,Domingo,2.78,2024-07-13
+84,Blvd. Diego Zapata,Salida a Matehuala,San Luis Potosí,7.98,Bajo,Despejado,1,Domingo,11.52,2024-01-16
+85,Blvd. Kukulcán,Av. Jacinto Canek,Mérida,9.34,Bajo,Lluvia Intensa,9,Sábado,5.46,2024-03-13
+86,Blvd. 5 de Mayo,Recta a Cholula,Puebla,4.25,Bajo,Despejado,4,Martes,5.54,2024-06-13
+87,Av. Colón,Calle 60,Mérida,9.74,Medio,Nublado,23,Jueves,17.83,2024-07-18
+88,Blvd. Manuel J. Clouthier,Blvd. Díaz Ordaz,Monterrey,15.38,Medio,Lluvia Intensa,11,Miércoles,14.84,2024-10-24
+89,Blvd. Díaz Ordaz,Av. Sendero,Monterrey,12.06,Bajo,Despejado,7,Sábado,10.24,2024-10-04
+90,Blvd. Adolfo López Mateos,Calzada Las Américas,León,13.62,Medio,Despejado,18,Sábado,16.22,2024-11-10
+91,Av. Jacinto Canek,Calle 60,Mérida,6.12,Muy Alto,Lluvia Intensa,20,Viernes,15.13,2024-05-09
+92,Av. Moctezuma,Camino Arenero,Zapopan,8.99,Medio,Nublado,14,Jueves,13.89,2024-06-19
+93,Blvd. Adolfo López Mateos,Blvd. Manuel Ávila Camacho,León,3.33,Alto,Lluvia Ligera,20,Miércoles,6.89,2024-11-09
+94,Av. Constitución,Av. Sendero,Monterrey,16.89,Bajo,Lluvia Ligera,1,Miércoles,17.4,2024-07-09
+95,Blvd. Antonio Rocha Cordero,Salida a Matehuala,San Luis Potosí,12.58,Medio,Despejado,20,Sábado,15.23,2024-12-11
+96,Av. Moctezuma,Periférico Norte,Zapopan,5.02,Medio,Nublado,2,Martes,9.59,2024-12-13
+97,Blvd. Díaz Ordaz,Av. Gonzalitos,Monterrey,5.16,Alto,Despejado,17,Sábado,16.67,2024-02-16
+98,Carretera Nacional,Av. Morones Prieto,Monterrey,12.9,Muy Alto,Despejado,17,Martes,58.37,2024-01-14
+99,Av. Jacinto Canek,Av. Itzáes,Mérida,8.09,Alto,Nublado,18,Miércoles,17.94,2024-12-15
+100,Calle 60,Av. Itzáes,Mérida,5.16,Bajo,Despejado,6,Lunes,5.79,2024-10-09
+101,Av. Constitución,Av. Las Torres,Monterrey,22.3,Medio,Despejado,14,Miércoles,35.92,2024-05-16
+102,Blvd. Manuel Ávila Camacho,Blvd. Juan José Torres Landa,León,3.52,Muy Alto,Lluvia Ligera,20,Martes,11.1,2024-12-01
+103,Av. Jacinto Canek,Av. Colón,Mérida,14.64,Medio,Despejado,14,Sábado,24.68,2024-12-18
+104,Blvd. Marcelino García Barragán,Av. Juárez,Guadalajara,1.95,Alto,Lluvia Intensa,16,Jueves,3.38,2024-10-20
+105,Blvd. Ortiz Mena,Periférico Ramón Corona,Juárez,5.53,Alto,Lluvia Ligera,13,Domingo,12.58,2024-04-22
+106,Calzada de Tlalpan,Av. Paseo de la Reforma,Ciudad de México,17.86,Alto,Nublado,19,Martes,36.53,2024-02-22
+107,Blvd. Agua Caliente,Vía Rápida Oriente,Tijuana,16.93,Medio,Nublado,3,Lunes,28.56,2024-04-25
+108,Av. Juárez,Circuito Juan Pablo II,Puebla,12.05,Bajo,Lluvia Ligera,3,Domingo,13.95,2024-02-01
+109,Camino Arenero,Blvd. Puerta de Hierro,Zapopan,4.0,Alto,Despejado,18,Viernes,10.02,2024-05-07
+110,Vía Atlixcáyotl,Blvd. Hermanos Serdán,Puebla,10.08,Bajo,Lluvia Intensa,2,Viernes,9.77,2024-02-24
+111,Periférico Manuel Bertrán,Av. Itzáes,Mérida,5.06,Alto,Nublado,20,Sábado,11.9,2024-12-21
+112,Blvd. Puerta de Hierro,Camino Arenero,Zapopan,7.54,Medio,Lluvia Ligera,20,Domingo,8.55,2024-11-25
+113,Av. Paseo de la Reforma,Periférico Norte,Ciudad de México,22.86,Medio,Lluvia Ligera,11,Domingo,29.34,2024-06-27
+114,Blvd. Manuel Ávila Camacho,Blvd. Juan José Torres Landa,León,2.27,Alto,Nublado,18,Lunes,5.27,2024-12-19
+115,Av. Juárez,Blvd. 5 de Mayo,Puebla,8.04,Bajo,Lluvia Intensa,23,Martes,7.8,2024-03-20
+116,Blvd. 5 de Mayo,Av. 14 Oriente,Puebla,3.0,Alto,Nublado,20,Viernes,6.57,2024-06-08
+117,Blvd. Puerta de Hierro,Camino Arenero,Zapopan,7.22,Alto,Despejado,14,Lunes,19.42,2024-02-08
+118,Salida a Matehuala,Blvd. Antonio Rocha Cordero,San Luis Potosí,12.34,Medio,Lluvia Ligera,17,Domingo,17.06,2024-04-25
+119,Blvd. Diego Zapata,Blvd. Antonio Rocha Cordero,San Luis Potosí,6.8,Medio,Nublado,4,Viernes,13.17,2024-06-04
+120,Av. Paseo de la Reforma,Eje 4 Sur,Ciudad de México,25.0,Bajo,Lluvia Intensa,9,Domingo,15.59,2024-04-24
+121,Viaducto Miguel Alemán,Av. Paseo de la Reforma,Ciudad de México,11.94,Medio,Despejado,5,Martes,22.81,2024-12-28
+122,Camino Arenero,Av. Moctezuma,Zapopan,9.87,Alto,Despejado,11,Sábado,26.64,2024-10-19
+123,Blvd. Ortiz Mena,Av. Las Américas,Juárez,6.98,Alto,Despejado,13,Viernes,20.79,2024-07-16
+124,Av. Las Torres,Av. Morones Prieto,Monterrey,6.52,Muy Alto,Lluvia Ligera,19,Miércoles,20.1,2024-12-12
+125,Av. Revolución,Av. Internacional,Tijuana,6.87,Alto,Lluvia Ligera,16,Sábado,14.84,2024-09-08
+126,Blvd. Diego Zapata,Av. Universidad,San Luis Potosí,3.61,Medio,Lluvia Ligera,1,Miércoles,5.29,2024-10-23
+127,Blvd. Manuel Ávila Camacho,Blvd. Hilario Medina,León,9.42,Alto,Lluvia Intensa,10,Jueves,17.01,2024-12-07
+128,Periférico Norte,Gran Vía,Ciudad de México,5.78,Alto,Nublado,18,Lunes,13.54,2024-12-02
+129,Anillo Periférico,Av. Juárez,Guadalajara,8.86,Alto,Nublado,9,Miércoles,20.47,2024-12-21
+130,Av. Insurgentes Sur,Av. Chapultepec,Ciudad de México,17.49,Medio,Nublado,20,Sábado,21.95,2024-04-24
+131,Vía Atlixcáyotl,Av. Forjadores de Puebla,Puebla,10.81,Muy Alto,Nublado,17,Lunes,56.51,2024-01-22
+132,Blvd. Juan José Torres Landa,Calzada Las Américas,León,9.6,Medio,Nublado,6,Lunes,16.37,2024-12-18
+133,Av. Vallarta,Periférico Norte,Zapopan,4.57,Alto,Lluvia Intensa,9,Jueves,7.58,2024-09-15
+134,Av. Juárez,Av. 14 Oriente,Puebla,9.62,Bajo,Lluvia Ligera,22,Viernes,10.41,2024-11-15
+135,Camino Arenero,Blvd. Puerta de Hierro,Zapopan,6.47,Bajo,Nublado,3,Viernes,8.64,2024-08-21
+136,Av. Lincoln,Calzada del Valle,Monterrey,5.1,Muy Alto,Nublado,9,Lunes,19.51,2024-07-28
+137,Camino Arenero,Periférico Norte,Zapopan,9.79,Medio,Lluvia Intensa,15,Jueves,10.55,2024-06-16
+138,Blvd. Hilario Medina,Calzada Las Américas,León,2.54,Bajo,Lluvia Intensa,3,Viernes,2.12,2024-07-02
+139,Circuito Juan Pablo II,Av. Juárez,Puebla,15.28,Medio,Despejado,12,Sábado,22.05,2024-01-28
+140,Av. Vallarta,Av. López Mateos,Guadalajara,2.18,Alto,Lluvia Ligera,19,Miércoles,4.08,2024-02-28
+141,Blvd. Kukulcán,Av. Jacinto Canek,Mérida,10.7,Bajo,Nublado,0,Domingo,12.76,2024-10-24
+142,Av. Sendero,Av. Lincoln,Monterrey,7.87,Medio,Nublado,10,Martes,10.6,2024-11-06
+143,Av. Las Américas,Av. Plutarco Elías Calles,Juárez,5.03,Alto,Nublado,17,Sábado,14.9,2024-09-23
+144,Blvd. Manuel Ávila Camacho,Av. Universidad,León,5.55,Alto,Despejado,21,Domingo,17.64,2024-02-26
+145,Av. Patria,Av. Federalismo,Guadalajara,12.97,Alto,Despejado,20,Lunes,30.85,2024-05-10
+146,Blvd. Diego Zapata,Av. Universidad,San Luis Potosí,5.18,Bajo,Despejado,2,Sábado,6.76,2024-04-27
+147,Av. Tecnológico,Av. Plutarco Elías Calles,Juárez,8.26,Medio,Despejado,5,Jueves,15.23,2024-04-19
+148,Blvd. Juan José Torres Landa,Calzada Las Américas,León,6.54,Alto,Lluvia Ligera,7,Martes,13.79,2024-09-03
+149,Eje Central Lázaro Cárdenas,Av. Chapultepec,Ciudad de México,9.57,Muy Alto,Lluvia Intensa,8,Viernes,24.83,2024-09-14
+150,Eje 103,Blvd. Diego Zapata,San Luis Potosí,1.91,Medio,Lluvia Intensa,15,Viernes,2.16,2024-11-28
