@@ -432,9 +432,7 @@ taskkill /PID <PID> /F
 - Autenticación de usuarios
 - Historial de búsquedas
 
-## Autor
 
-Proyecto desarrollado como parte del curso de Inteligencia Artificial.
 
 ## Licencia
 
