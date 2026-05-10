@@ -10,6 +10,9 @@ from typing import Optional
 from datetime import datetime
 import time
 
+from contextlib import asynccontextmanager
+from typing import Optional
+
 from database import engine, get_db, Base, SessionLocal
 from models import Ciudad, Calle, RegistroTrafico, Nodo, Arista, BusquedaHistorial
 from schemas import (
@@ -23,25 +26,69 @@ from rules import MotorReglas, evaluar_ruta
 from ml_modelo import ModeloPredictor, entrenar_y_guardar
 
 
+# ==================== Global State ====================
+ml_modelo: Optional[ModeloPredictor] = None
+motor_reglas = MotorReglas()
+grafo_cache: Optional[any] = None
+grafo_timestamp: float = 0
+
+
+# ==================== Lifespan ====================
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Lifespan context manager for startup/shutdown events."""
+    global grafo_cache, grafo_timestamp, ml_modelo
+
+    print("\n" + "="*60)
+    print("  Sistema de Movilidad Urbana - Guatemala")
+    print("="*60 + "\n")
+
+    # Startup
+    Base.metadata.create_all(bind=engine)
+    print("[OK] Base de datos inicializada")
+
+    try:
+        seed_database()
+        print("[OK] Datos de Guatemala cargados")
+    except Exception as e:
+        print(f"  Seed: {e}")
+
+    try:
+        ml_modelo = entrenar_y_guardar()
+        print("[OK] Modelos ML listos")
+    except Exception as e:
+        print(f"  ML: {e}")
+
+    grafo_cache = construir_grafo()
+    grafo_timestamp = time.time()
+    print(f"[OK] Grafo construido: {len(grafo_cache.nodos)} nodos")
+
+    print("\n" + "="*60)
+    print("  Sistema listo [OK]")
+    print("="*60 + "\n")
+
+    yield  # Server running
+
+    # Shutdown (if needed)
+    print("[OK] Apagando servidor...")
+
+
 # ==================== App Setup ====================
 app = FastAPI(
     title="Sistema Inteligente de Movilidad Urbana - Guatemala",
     description="""
-    🚗 Sistema de recomendación de rutas urbanas con IA para Guatemala.
+    Sistema de recomendación de rutas urbanas con IA para Guatemala.
 
     ## Características
     - **Búsqueda de Rutas**: BFS, DFS y A* para encontrar rutas óptimas
     - **Lógica de Predicados**: 8 reglas de decisión para ajustar recomendaciones
     - **Machine Learning**: Regresión Lineal, Random Forest y Gradient Boosting
     - **Datos de Guatemala**: 10 ciudades con calles reales
-
-    ## Ciudades Disponibles
-    - Ciudad de Guatemala, Antigua, Quetzaltenango, Escuintla
-    - Puerto San José, Cobán, Zacapa, Chiquimula, Retalhuleu, Mazatenango
     """,
     version="2.0.0",
     docs_url="/docs",
-    redoc_url="/redoc"
+    redoc_url="/redoc",
+    lifespan=lifespan
 )
 
 # CORS
@@ -59,43 +106,6 @@ ml_modelo: Optional[ModeloPredictor] = None
 motor_reglas = MotorReglas()
 grafo_cache: Optional[dict] = None
 grafo_timestamp: float = 0
-
-
-@app.on_event("startup")
-async def startup_event():
-    """Inicializar sistema al arrancar."""
-    global grafo_cache, grafo_timestamp, ml_modelo
-
-    print("\n" + "="*60)
-    print("  Sistema de Movilidad Urbana - Guatemala")
-    print("="*60 + "\n")
-
-    # Crear tablas
-    Base.metadata.create_all(bind=engine)
-    print("[OK] Base de datos inicializada")
-
-    # Seed datos si necesario
-    try:
-        seed_database()
-        print("[OK] Datos de Guatemala cargados")
-    except Exception as e:
-        print(f"  Seed: {e}")
-
-    # Entrenar/cargar modelo ML
-    try:
-        ml_modelo = entrenar_y_guardar()
-        print("[OK] Modelos ML listos")
-    except Exception as e:
-        print(f"  ML: {e}")
-
-    # Construir grafo inicial
-    grafo_cache = construir_grafo()
-    grafo_timestamp = time.time()
-    print(f"[OK] Grafo construido: {len(grafo_cache.nodos)} nodos")
-
-    print("\n" + "="*60)
-    print("  Sistema listo [OK]")
-    print("="*60 + "\n")
 
 
 def construir_grafo():
