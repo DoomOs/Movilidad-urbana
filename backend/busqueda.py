@@ -169,7 +169,7 @@ class BuscadorRutas:
             return None
 
         # Cola de prioridad: (f_score, g_score, nodo, ruta, distancia, tiempo)
-        h_inicial = self._heuristica_euclidiana(origen, destino)
+        h_inicial = self.grafo._heuristica_euclidiana(origen, destino)
         cola = [(h_inicial, 0.0, origen, [origen], 0.0, 0.0)]
 
         g_score: Dict[str, float] = {origen: 0.0}
@@ -209,7 +209,7 @@ class BuscadorRutas:
 
                 if arista["destino"] not in g_score or nuevo_g < g_score[arista["destino"]]:
                     g_score[arista["destino"]] = nuevo_g
-                    h = self._heuristica_euclidiana(arista["destino"], destino)
+                    h = self.grafo._heuristica_euclidiana(arista["destino"], destino)
                     f = nuevo_g + h
 
                     heapq.heappush(cola, (
