@@ -1,12 +1,12 @@
-import { useState, useEffect, lazy, Suspense } from 'react';
+import { useState, useEffect } from 'react';
 import { ThemeProvider, useTheme } from './hooks/useTheme';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './components/ui/tabs';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from './components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from './components/ui/card';
 import { Button } from './components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './components/ui/select';
 import { Badge } from './components/ui/badge';
 import { Switch } from './components/ui/switch';
-import { Sun, Moon, MapPin, Navigation, BarChart3, Car, Bike, AlertTriangle, Clock, CheckCircle2 } from 'lucide-react';
+import { Sun, Moon, Navigation, BarChart3, AlertTriangle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 import {
@@ -14,8 +14,7 @@ import {
   compararModelos, obtenerAnalisis, obtenerMetricasML
 } from './api';
 import { StatsCards, TrafficChart, TimeDistributionChart, StreetsByCityChart, MLMetricsChart } from './components/Dashboard';
-
-const MapComponent = lazy(() => import('./components/Map'));
+import RouteNodes from './components/RouteNodes';
 
 const DIAS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
 const CLIMAS = ['Despejado', 'Nublado', 'Lluvia Ligera', 'Lluvia Intensa'];
@@ -32,7 +31,7 @@ function formatMin(min) {
   return `${h}h ${m}m`;
 }
 
-function AppContent() {
+export default function App() {
   const { theme, toggleTheme } = useTheme();
   const [tab, setTab] = useState('buscar');
   const [loading, setLoading] = useState(false);
@@ -54,8 +53,6 @@ function AppContent() {
   const [resultados, setResultados] = useState([]);
   const [prediccion, setPrediccion] = useState(null);
   const [comparacionML, setComparacionML] = useState(null);
-
-  const [mapCenter, setMapCenter] = useState([14.6349, -90.5069]);
   const [algoSeleccionado, setAlgoSeleccionado] = useState(null);
 
   // Cargar datos iniciales
@@ -87,11 +84,8 @@ function AppContent() {
         setOrigen(data.calles[0]);
         setDestino(data.calles[1]);
       }
-      // Actualizar centro del mapa
-      const cityData = ciudades.find(c => c.nombre === ciudad);
-      if (cityData?.latitud) setMapCenter([cityData.latitud, cityData.longitud]);
     }).catch(console.error);
-  }, [ciudad, ciudades]);
+  }, [ciudad]);
 
   const handleBuscar = async () => {
     if (!origen || !destino || origen === destino) {
@@ -104,15 +98,18 @@ function AppContent() {
     setPrediccion(null);
 
     try {
-      const data = { origen, destino, ciudad, hora, dia_semana: dia, tipo_vehiculo: vehiculo, clima };
+      const data = {
+        origen,
+        destino,
+        ciudad,
+        hora,
+        dia_semana: dia,
+        tipo_vehiculo: vehiculo,
+        clima
+      };
       const results = await buscarRuta(data);
       setResultados(results);
-
-      // Centrar mapa en primera coordenada disponible
-      const firstCoords = results[0]?.coordenadas_ruta;
-      if (firstCoords?.length > 0) {
-        setMapCenter([firstCoords[0].lat, firstCoords[0].lng]);
-      }
+      setAlgoSeleccionado(results[0]?.algoritmo);
     } catch (err) {
       setError(err?.response?.data?.detail || 'Error al buscar ruta');
     } finally {
@@ -138,7 +135,9 @@ function AppContent() {
     }
   };
 
-  const mejor = resultados.length ? resultados.reduce((a, b) => a.tiempo_total < b.tiempo_total ? a : b) : null;
+  const mejor = resultados.length
+    ? resultados.reduce((a, b) => a.tiempo_total < b.tiempo_total ? a : b)
+    : null;
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -304,51 +303,18 @@ function AppContent() {
                 </CardContent>
               </Card>
 
-              {/* Mapa */}
-              <Card>
-                <CardHeader className="pb-2">
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="text-base">Mapa</CardTitle>
-                    {resultados.length > 0 && (
-                      <div className="flex gap-1">
-                        {resultados.map(r => (
-                          <button
-                            key={r.algoritmo}
-                            onClick={() => setAlgoSeleccionado(algoSeleccionado === r.algoritmo ? null : r.algoritmo)}
-                            className={`px-2 py-0.5 rounded text-[10px] font-medium transition ${
-                              algoSeleccionado === r.algoritmo ? 'ring-2 ring-primary' : 'opacity-70 hover:opacity-100'
-                            }`}
-                            style={{
-                              backgroundColor: r.algoritmo === 'A*' ? '#22c55e' : r.algoritmo === 'BFS' ? '#3b82f6' : '#a855f7',
-                              color: 'white'
-                            }}
-                          >
-                            {r.algoritmo}
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </CardHeader>
-                <CardContent className="p-0">
-                  <div className="h-[300px] rounded-md overflow-hidden border">
-                    <Suspense fallback={<div className="h-full flex items-center justify-center text-muted-foreground text-sm">Cargando mapa...</div>}>
-                      <MapComponent
-                        center={mapCenter}
-                        zoom={13}
-                        resultados={resultados}
-                        selectedAlgorithm={algoSeleccionado}
-                      />
-                    </Suspense>
-                  </div>
-                </CardContent>
-              </Card>
+              {/* Route Nodes Visualization */}
+              <RouteNodes
+                resultados={resultados}
+                selectedAlgorithm={algoSeleccionado}
+                ciudad={ciudad}
+              />
             </div>
 
-            {/* Resultados */}
+            {/* Resultados Cards */}
             {resultados.length > 0 && (
               <div className="space-y-3">
-                <h3 className="text-sm font-medium text-muted-foreground">Resultados de Búsqueda</h3>
+                <h3 className="text-sm font-medium text-muted-foreground">Resultados</h3>
                 <div className="grid sm:grid-cols-3 gap-3">
                   {resultados.map((r) => {
                     const isBest = r.algoritmo === mejor?.algoritmo;
@@ -378,19 +344,10 @@ function AppContent() {
                                 <span className="font-medium text-xs text-primary">{formatMin(r.tiempo_ajustado)}</span>
                               </>
                             )}
-                            <span className="text-muted-foreground text-xs">Nodos:</span>
+                            <span className="text-muted-foreground text-xs">Nodos expandidos:</span>
                             <span className="font-medium text-xs">{r.nodos_expandidos}</span>
                           </div>
 
-                          {/* Ruta */}
-                          <div className="pt-2 border-t">
-                            <p className="text-[10px] text-muted-foreground mb-1">Ruta:</p>
-                            <p className="text-[11px] leading-tight truncate font-mono">
-                              {r.ruta.join(' → ')}
-                            </p>
-                          </div>
-
-                          {/* Recomendaciones */}
                           {r.recomendaciones?.length > 0 && (
                             <div className="flex flex-wrap gap-1 pt-1">
                               {r.recomendaciones.map((rec, i) => (
@@ -404,7 +361,7 @@ function AppContent() {
                   })}
                 </div>
 
-                {/* Predicción ML */}
+                {/* ML Prediction */}
                 <Card>
                   <CardHeader className="pb-2">
                     <CardTitle className="text-sm">Predicción con Machine Learning</CardTitle>
@@ -429,7 +386,7 @@ function AppContent() {
 
                         {comparacionML && (
                           <div className="space-y-1.5">
-                            <p className="text-xs font-medium text-muted-foreground">Modelos</p>
+                            <p className="text-xs font-medium text-muted-foreground">Comparación de Modelos</p>
                             {Object.entries(comparacionML).map(([modelo, datos]) => (
                               <div key={modelo} className="flex justify-between items-center text-xs">
                                 <span className="capitalize">{modelo.replace('_', ' ')}</span>
@@ -468,13 +425,5 @@ function AppContent() {
         </div>
       </footer>
     </div>
-  );
-}
-
-export default function App() {
-  return (
-    <ThemeProvider>
-      <AppContent />
-    </ThemeProvider>
   );
 }
