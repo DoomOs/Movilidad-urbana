@@ -1,406 +1,560 @@
-import { useState, useEffect } from 'react';
-import { buscarRuta, compararAlgoritmos, obtenerCiudades, obtenerCallesPorCiudad, predecirTiempo, obtenerAnalisisDatos } from './api';
+import { useState, useEffect, Suspense, lazy } from 'react';
+import { ThemeProvider, useTheme } from './hooks/useTheme';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from './components/ui/tabs';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from './components/ui/card';
+import { Button } from './components/ui/button';
+import { Input } from './components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './components/ui/select';
+import { Badge } from './components/ui/badge';
+import { Switch } from './components/ui/switch';
+import { Card as UICard } from './components/ui/card';
+import { Sun, Moon, MapPin, Search, BarChart3, Car, Bike, AlertTriangle, Clock, CheckCircle2, X } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { formatTime, formatDistance, getTrafficColor } from './lib/utils';
 
-function App() {
-  const [tabActiva, setTabActiva] = useState('buscar');
+import {
+  obtenerCiudades, obtenerCalles, buscarRuta, predecirTiempo,
+  compararModelos, obtenerAnalisis, obtenerMetricasML, verificarSalud
+} from './api';
+import {
+  StatsCards, TrafficChart, TimeDistributionChart,
+  StreetsByCityChart, MLMetricsChart, RecentRecordsTable
+} from './components/Dashboard';
+
+// Lazy load Map component
+const MapComponent = lazy(() => import('./components/Map'));
+
+const DIAS_SEMANA = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+const CLIMAS = ['Despejado', 'Nublado', 'Lluvia Ligera', 'Lluvia Intensa'];
+const VEHICULOS = [
+  { value: 'automovil', label: 'Automóvil', icon: Car },
+  { value: 'bicicleta', label: 'Bicicleta', icon: Bike },
+  { value: 'motocicleta', label: 'Motocicleta', icon: Bike },
+];
+
+function AppContent() {
+  const { theme, toggleTheme } = useTheme();
+  const [activeTab, setActiveTab] = useState('buscar');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(null);
+
+  // Data states
   const [ciudades, setCiudades] = useState([]);
   const [calles, setCalles] = useState([]);
+  const [analisis, setAnalisis] = useState(null);
+  const [metricasML, setMetricasML] = useState(null);
+
+  // Form states
+  const [ciudadSeleccionada, setCiudadSeleccionada] = useState('');
   const [origen, setOrigen] = useState('');
   const [destino, setDestino] = useState('');
-  const [ciudadSeleccionada, setCiudadSeleccionada] = useState('');
   const [hora, setHora] = useState(12);
   const [diaSemana, setDiaSemana] = useState('Lunes');
-  const [tipoVehiculo, setTipoVehiculo] = useState('automovil');
+  const [vehiculo, setVehiculo] = useState('automovil');
   const [clima, setClima] = useState('Despejado');
-  
-  const [resultados, setResultados] = useState(null);
+
+  // Results states
+  const [resultados, setResultados] = useState([]);
   const [comparacion, setComparacion] = useState(null);
   const [prediccion, setPrediccion] = useState(null);
-  const [analisis, setAnalisis] = useState(null);
-  
-  const [cargando, setCargando] = useState(false);
-  const [error, setError] = useState(null);
+  const [comparacionML, setComparacionML] = useState(null);
 
-  // Cargar ciudades al iniciar
+  // Map center
+  const [mapCenter, setMapCenter] = useState([14.6349, -90.5069]);
+  const [selectedAlgo, setSelectedAlgo] = useState(null);
+
+  // Load initial data
   useEffect(() => {
-    cargarCiudades();
-    cargarAnalisis();
+    const init = async () => {
+      try {
+        const health = await verificarSalud();
+        const cities = await obtenerCiudades();
+        const data = await obtenerAnalisis();
+        const metricas = await obtenerMetricasML();
+
+        setCiudades(cities);
+        setAnalisis(data);
+        setMetricasML(metricas);
+
+        if (cities.length > 0) {
+          setCiudadSeleccionada(cities[0].nombre);
+        }
+      } catch (err) {
+        console.error('Error initializing:', err);
+      }
+    };
+    init();
   }, []);
 
-  // Cargar calles cuando cambia la ciudad
+  // Load streets when city changes
   useEffect(() => {
     if (ciudadSeleccionada) {
-      cargarCalles(ciudadSeleccionada);
-    }
-  }, [ciudadSeleccionada]);
-
-  const cargarCiudades = async () => {
-    try {
-      const data = await obtenerCiudades();
-      setCiudades(data.ciudades);
-      if (data.ciudades.length > 0) {
-        setCiudadSeleccionada(data.ciudades[0]);
+      const cityData = ciudades.find(c => c.nombre === ciudadSeleccionada);
+      if (cityData && cityData.latitud && cityData.longitud) {
+        setMapCenter([cityData.latitud, cityData.longitud]);
       }
-    } catch (err) {
-      setError('Error al cargar ciudades: ' + err.message);
-    }
-  };
 
-  const cargarCalles = async (ciudad) => {
-    try {
-      const data = await obtenerCallesPorCiudad(ciudad);
-      setCalles(data.calles);
-      if (data.calles.length > 0) {
-        setOrigen(data.calles[0]);
-        if (data.calles.length > 1) {
+      obtenerCalles(ciudadSeleccionada).then(data => {
+        setCalles(data.calles || []);
+        if (data.calles && data.calles.length >= 2) {
+          setOrigen(data.calles[0]);
           setDestino(data.calles[1]);
         }
-      }
-    } catch (err) {
-      setError('Error al cargar calles: ' + err.message);
+      }).catch(console.error);
     }
-  };
+  }, [ciudadSeleccionada, ciudades]);
 
-  const cargarAnalisis = async () => {
-    try {
-      const data = await obtenerAnalisisDatos();
-      setAnalisis(data);
-    } catch (err) {
-      console.error('Error al cargar análisis:', err);
-    }
-  };
-
-  const handleBuscarRuta = async () => {
+  const handleBuscar = async () => {
     if (!origen || !destino) {
-      setError('Debe seleccionar origen y destino');
+      setError('Selecciona origen y destino');
       return;
     }
 
-    setCargando(true);
+    setLoading(true);
     setError(null);
+    setSuccess(null);
 
     try {
       const datos = {
         origen,
         destino,
+        ciudad: ciudadSeleccionada,
         hora,
         dia_semana: diaSemana,
-        tipo_vehiculo: tipoVehiculo,
+        tipo_vehiculo: vehiculo,
         clima,
       };
 
-      const resultadosBusqueda = await buscarRuta(datos);
-      setResultados(resultadosBusqueda);
+      const results = await buscarRuta(datos);
+      setResultados(results);
 
-      const comparacionData = await compararAlgoritmos(origen, destino);
-      setComparacion(comparacionData);
+      if (results.length > 0 && results[0].coordenadas_ruta && results[0].coordenadas_ruta.length > 0) {
+        const firstCoord = results[0].coordenadas_ruta[0];
+        setMapCenter([firstCoord.lat, firstCoord.lng]);
+      }
+
+      setSuccess('Rutas encontradas');
+      setTimeout(() => setSuccess(null), 3000);
     } catch (err) {
       setError(err.response?.data?.detail || 'Error al buscar ruta');
     } finally {
-      setCargando(false);
+      setLoading(false);
     }
   };
 
-  const handlePredecirTiempo = async () => {
-    if (!origen || !destino) {
-      setError('Debe seleccionar origen y destino para predecir');
+  const handlePredecir = async () => {
+    if (resultados.length === 0) {
+      setError('Primero busca una ruta');
       return;
     }
 
-    setCargando(true);
-    setError(null);
+    setLoading(true);
 
     try {
-      // Obtener distancia aproximada de los resultados previos o usar valor por defecto
-      const distancia = resultados ? resultados[0]?.distancia_total : 5.0;
-      const prediccionData = await predecirTiempo(distancia, 'Medio', hora);
-      setPrediccion(prediccionData);
+      const distancia = resultados[0]?.distancia_total || 5;
+      const result = await predecirTiempo(distancia, 'Medio', hora);
+      setPrediccion(result);
+
+      const compML = await compararModelos(distancia, 'Medio', hora);
+      setComparacionML(compML.predicciones);
     } catch (err) {
-      setError('Error al predecir tiempo: ' + err.message);
+      setError('Error al predecir');
     } finally {
-      setCargando(false);
+      setLoading(false);
     }
   };
 
+  const mejorResultado = resultados.length > 0
+    ? resultados.reduce((a, b) => a.tiempo_total < b.tiempo_total ? a : b)
+    : null;
+
   return (
-    <div className="app">
-      <header>
-        <div className="container">
-          <h1>Sistema Inteligente de Recomendación de Rutas Urbanas</h1>
-          <p>IA aplicada a movilidad urbana con búsqueda, lógica de predicados y machine learning</p>
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="container flex h-16 items-center justify-between px-4">
+          <div className="flex items-center gap-2">
+            <div className="bg-primary p-2 rounded-lg">
+              <MapPin className="h-5 w-5 text-primary-foreground" />
+            </div>
+            <div>
+              <h1 className="text-lg font-bold">Sistema de Movilidad GT</h1>
+              <p className="text-xs text-muted-foreground">IA para rutas en Guatemala</p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <Sun className="h-4 w-4" />
+              <Switch checked={theme === 'dark'} onCheckedChange={toggleTheme} />
+              <Moon className="h-4 w-4" />
+            </div>
+          </div>
         </div>
       </header>
 
-      <div className="container">
-        {error && <div className="error">{error}</div>}
+      {/* Main Content */}
+      <main className="container px-4 py-6">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="buscar" className="gap-2">
+              <Search className="h-4 w-4" />
+              Buscar Ruta
+            </TabsTrigger>
+            <TabsTrigger value="analisis" className="gap-2">
+              <BarChart3 className="h-4 w-4" />
+              Análisis de Datos
+            </TabsTrigger>
+          </TabsList>
 
-        <div className="tabs">
-          <button 
-            className={`tab ${tabActiva === 'buscar' ? 'active' : ''}`}
-            onClick={() => setTabActiva('buscar')}
-          >
-            Buscar Ruta
-          </button>
-          <button 
-            className={`tab ${tabActiva === 'analisis' ? 'active' : ''}`}
-            onClick={() => setTabActiva('analisis')}
-          >
-            Análisis de Datos
-          </button>
-        </div>
-
-        {tabActiva === 'buscar' && (
-          <>
-            <div className="card">
-              <h2>Parámetros del Viaje</h2>
-              
-              <div className="form-group">
-                <label>Ciudad:</label>
-                <select 
-                  value={ciudadSeleccionada} 
-                  onChange={(e) => setCiudadSeleccionada(e.target.value)}
+          {/* Tab: Buscar Ruta */}
+          <TabsContent value="buscar" className="space-y-6">
+            {/* Alerts */}
+            <AnimatePresence>
+              {error && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className="bg-destructive/10 text-destructive p-4 rounded-lg flex items-center gap-2"
                 >
-                  {ciudades.map((ciudad) => (
-                    <option key={ciudad} value={ciudad}>{ciudad}</option>
-                  ))}
-                </select>
-              </div>
+                  <AlertTriangle className="h-5 w-5" />
+                  {error}
+                  <Button variant="ghost" size="icon" onClick={() => setError(null)} className="ml-auto">
+                    <X className="h-4 w-4" />
+                  </Button>
+                </motion.div>
+              )}
+              {success && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className="bg-green-500/10 text-green-600 p-4 rounded-lg flex items-center gap-2"
+                >
+                  <CheckCircle2 className="h-5 w-5" />
+                  {success}
+                </motion.div>
+              )}
+            </AnimatePresence>
 
-              <div className="form-group">
-                <label>Origen:</label>
-                <select value={origen} onChange={(e) => setOrigen(e.target.value)}>
-                  {calles.map((calle) => (
-                    <option key={calle} value={calle}>{calle}</option>
-                  ))}
-                </select>
-              </div>
+            <div className="grid lg:grid-cols-2 gap-6">
+              {/* Form */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Parámetros del Viaje</CardTitle>
+                  <CardDescription>Ingresa los datos para buscar la mejor ruta</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {/* Ciudad */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Ciudad</label>
+                    <Select value={ciudadSeleccionada} onValueChange={setCiudadSeleccionada}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Seleccionar ciudad" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {ciudades.map(c => (
+                          <SelectItem key={c.id} value={c.nombre}>{c.nombre}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
 
-              <div className="form-group">
-                <label>Destino:</label>
-                <select value={destino} onChange={(e) => setDestino(e.target.value)}>
-                  {calles.map((calle) => (
-                    <option key={calle} value={calle}>{calle}</option>
-                  ))}
-                </select>
-              </div>
+                  {/* Origen y Destino */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Origen</label>
+                      <Select value={origen} onValueChange={setOrigen}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Origen" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {calles.map(c => (
+                            <SelectItem key={c} value={c}>{c}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Destino</label>
+                      <Select value={destino} onValueChange={setDestino}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Destino" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {calles.map(c => (
+                            <SelectItem key={c} value={c}>{c}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '1rem' }}>
-                <div className="form-group">
-                  <label>Hora:</label>
-                  <input 
-                    type="number" 
-                    min="0" 
-                    max="23" 
-                    value={hora} 
-                    onChange={(e) => setHora(parseInt(e.target.value))}
-                  />
-                </div>
+                  {/* Hora */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Hora del día: {hora}:00</label>
+                    <input
+                      type="range"
+                      min="0"
+                      max="23"
+                      value={hora}
+                      onChange={e => setHora(parseInt(e.target.value))}
+                      className="w-full"
+                    />
+                    <div className="flex justify-between text-xs text-muted-foreground">
+                      <span>0:00</span>
+                      <span>12:00</span>
+                      <span>23:00</span>
+                    </div>
+                  </div>
 
-                <div className="form-group">
-                  <label>Día:</label>
-                  <select value={diaSemana} onChange={(e) => setDiaSemana(e.target.value)}>
-                    {['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'].map((dia) => (
-                      <option key={dia} value={dia}>{dia}</option>
-                    ))}
-                  </select>
-                </div>
+                  {/* Día y Vehículo */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Día</label>
+                      <Select value={diaSemana} onValueChange={setDiaSemana}>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {DIAS_SEMANA.map(d => (
+                            <SelectItem key={d} value={d}>{d}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Vehículo</label>
+                      <Select value={vehiculo} onValueChange={setVehiculo}>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {VEHICULOS.map(v => (
+                            <SelectItem key={v.value} value={v.value}>{v.label}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
 
-                <div className="form-group">
-                  <label>Vehículo:</label>
-                  <select value={tipoVehiculo} onChange={(e) => setTipoVehiculo(e.target.value)}>
-                    <option value="automovil">Automóvil</option>
-                    <option value="bicicleta">Bicicleta</option>
-                    <option value="motocicleta">Motocicleta</option>
-                  </select>
-                </div>
+                  {/* Clima */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Clima</label>
+                    <Select value={clima} onValueChange={setClima}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {CLIMAS.map(c => (
+                          <SelectItem key={c} value={c}>{c}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
 
-                <div className="form-group">
-                  <label>Clima:</label>
-                  <select value={clima} onChange={(e) => setClima(e.target.value)}>
-                    <option value="Despejado">Despejado</option>
-                    <option value="Nublado">Nublado</option>
-                    <option value="Lluvia Ligera">Lluvia Ligera</option>
-                    <option value="Lluvia Intensa">Lluvia Intensa</option>
-                  </select>
-                </div>
-              </div>
+                  <Button onClick={handleBuscar} disabled={loading} className="w-full" size="lg">
+                    {loading ? 'Buscando...' : 'Buscar Ruta Óptima'}
+                  </Button>
+                </CardContent>
+              </Card>
 
-              <button 
-                className="btn" 
-                onClick={handleBuscarRuta}
-                disabled={cargando}
+              {/* Map */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Mapa de Rutas</CardTitle>
+                  <CardDescription>
+                    {resultados.length > 0
+                      ? `Mostrando ${resultados.length} rutas encontradas`
+                      : 'Selecciona origen y destino para ver las rutas'}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-[400px] rounded-lg overflow-hidden border">
+                    <Suspense fallback={<div className="h-full flex items-center justify-center">Cargando mapa...</div>}>
+                      <MapComponent
+                        center={mapCenter}
+                        zoom={13}
+                        resultados={resultados}
+                        selectedAlgorithm={selectedAlgo}
+                      />
+                    </Suspense>
+                  </div>
+
+                  {/* Legend */}
+                  {resultados.length > 0 && (
+                    <div className="flex gap-4 mt-4 justify-center">
+                      {resultados.map(r => (
+                        <Button
+                          key={r.algoritmo}
+                          variant={selectedAlgo === r.algoritmo ? 'default' : 'outline'}
+                          size="sm"
+                          onClick={() => setSelectedAlgo(selectedAlgo === r.algoritmo ? null : r.algoritmo)}
+                        >
+                          <Badge
+                            className="mr-2"
+                            style={{ backgroundColor: r.algoritmo === 'A*' ? '#22c55e' : r.algoritmo === 'BFS' ? '#3b82f6' : '#a855f7' }}
+                          >
+                            {r.algoritmo}
+                          </Badge>
+                          {formatTime(r.tiempo_total)}
+                        </Button>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Results */}
+            {resultados.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="grid md:grid-cols-3 gap-4"
               >
-                {cargando ? 'Buscando...' : 'Buscar Ruta Óptima'}
-              </button>
-            </div>
-
-            {resultados && (
-              <div className="card resultados">
-                <h2>Resultados de Búsqueda</h2>
-                
-                {resultados.map((resultado, index) => (
-                  <div key={index} className="ruta-card">
-                    <h3>{resultado.algoritmo}</h3>
-                    <div className="ruta-info">
-                      <span><strong>Distancia:</strong> {resultado.distancia_total} km</span>
-                      <span><strong>Tiempo:</strong> {resultado.tiempo_total} min</span>
-                      {resultado.tiempo_ajustado && (
-                        <span><strong>Tiempo Ajustado:</strong> {resultado.tiempo_ajustado} min</span>
+                {resultados.map((resultado, idx) => {
+                  const isBest = resultado.algoritmo === mejorResultado?.algoritmo;
+                  return (
+                    <UICard
+                      key={idx}
+                      className={`relative overflow-hidden ${isBest ? 'ring-2 ring-primary' : ''}`}
+                    >
+                      {isBest && (
+                        <Badge className="absolute top-2 right-2" variant="success">
+                          ✓ Mejor
+                        </Badge>
                       )}
-                      <span><strong>Nodos:</strong> {resultado.nodos_expandidos}</span>
-                    </div>
-                    <div className="ruta">
-                      <strong>Ruta:</strong> {resultado.ruta.join(' → ')}
-                    </div>
-                    
-                    {resultado.recomendaciones.length > 0 && (
-                      <div className="recomendaciones">
-                        <strong>Recomendaciones:</strong> {resultado.recomendaciones.join(', ')}
-                      </div>
-                    )}
-                    
-                    {resultado.advertencias.length > 0 && (
-                      <div className="advertencias">
-                        <strong>Advertencias:</strong> {resultado.advertencias.join(', ')}
-                      </div>
-                    )}
-                  </div>
-                ))}
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-lg flex items-center gap-2">
+                          <Badge
+                            style={{
+                              backgroundColor: resultado.algoritmo === 'A*' ? '#22c55e' : resultado.algoritmo === 'BFS' ? '#3b82f6' : '#a855f7'
+                            }}
+                          >
+                            {resultado.algoritmo}
+                          </Badge>
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-3">
+                        <div className="grid grid-cols-2 gap-2 text-sm">
+                          <div>
+                            <span className="text-muted-foreground">Distancia:</span>
+                            <span className="ml-1 font-medium">{formatDistance(resultado.distancia_total)}</span>
+                          </div>
+                          <div>
+                            <span className="text-muted-foreground">Tiempo:</span>
+                            <span className="ml-1 font-medium">{formatTime(resultado.tiempo_total)}</span>
+                          </div>
+                          <div>
+                            <span className="text-muted-foreground">Ajustado:</span>
+                            <span className="ml-1 font-medium">{formatTime(resultado.tiempo_ajustado || resultado.tiempo_total)}</span>
+                          </div>
+                          <div>
+                            <span className="text-muted-foreground">Nodos:</span>
+                            <span className="ml-1 font-medium">{resultado.nodos_expandidos}</span>
+                          </div>
+                        </div>
 
-                {comparacion && (
-                  <div style={{ marginTop: '2rem' }}>
-                    <h3>Comparación de Algoritmos</h3>
-                    <table className="comparacion-table">
-                      <thead>
-                        <tr>
-                          <th>Algoritmo</th>
-                          <th>Tiempo (min)</th>
-                          <th>Distancia (km)</th>
-                          <th>Nodos Expandidos</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {comparacion.bfs && (
-                          <tr className={comparacion.mejor_opcion === 'BFS' ? 'mejor-opcion' : ''}>
-                            <td>BFS {comparacion.mejor_opcion === 'BFS' && '✓'}</td>
-                            <td>{comparacion.bfs.tiempo}</td>
-                            <td>{comparacion.bfs.distancia}</td>
-                            <td>{comparacion.bfs.nodos_expandidos}</td>
-                          </tr>
-                        )}
-                        {comparacion.dfs && (
-                          <tr className={comparacion.mejor_opcion === 'DFS' ? 'mejor-opcion' : ''}>
-                            <td>DFS {comparacion.mejor_opcion === 'DFS' && '✓'}</td>
-                            <td>{comparacion.dfs.tiempo}</td>
-                            <td>{comparacion.dfs.distancia}</td>
-                            <td>{comparacion.dfs.nodos_expandidos}</td>
-                          </tr>
-                        )}
-                        {comparacion.a_estrella && (
-                          <tr className={comparacion.mejor_opcion === 'A*' ? 'mejor-opcion' : ''}>
-                            <td>A* {comparacion.mejor_opcion === 'A*' && '✓'}</td>
-                            <td>{comparacion.a_estrella.tiempo}</td>
-                            <td>{comparacion.a_estrella.distancia}</td>
-                            <td>{comparacion.a_estrella.nodos_expandidos}</td>
-                          </tr>
-                        )}
-                      </tbody>
-                    </table>
-                    {comparacion.razon && (
-                      <p style={{ marginTop: '1rem', fontStyle: 'italic' }}>
-                        <strong>Mejor opción:</strong> {comparacion.mejor_opcion} - {comparacion.razon}
-                      </p>
-                    )}
-                  </div>
-                )}
+                        <div className="text-xs text-muted-foreground">
+                          <span className="font-medium">Ruta:</span>
+                          <div className="truncate">{resultado.ruta.join(' → ')}</div>
+                        </div>
 
-                <button 
-                  className="btn" 
-                  onClick={handlePredecirTiempo}
-                  disabled={cargando}
-                  style={{ marginTop: '1rem' }}
-                >
-                  Predecir Tiempo con ML
-                </button>
-
-                {prediccion && (
-                  <div className="success" style={{ marginTop: '1rem' }}>
-                    <strong>Predicción ML:</strong> {prediccion.tiempo_predicho} minutos 
-                    (Confianza: {prediccion.confianza})
-                  </div>
-                )}
-              </div>
+                        {resultado.advertencias?.length > 0 && (
+                          <div className="flex flex-wrap gap-1">
+                            {resultado.advertencias.map((adv, i) => (
+                              <Badge key={i} variant="warning" className="text-xs">
+                                {adv}
+                              </Badge>
+                            ))}
+                          </div>
+                        )}
+                      </CardContent>
+                    </UICard>
+                  );
+                })}
+              </motion.div>
             )}
-          </>
-        )}
 
-        {tabActiva === 'analisis' && analisis && (
-          <div className="card">
-            <h2>Análisis Exploratorio de Datos</h2>
-            
-            <div className="stats-grid">
-              <div className="stat-card">
-                <h3>{analisis.total_registros}</h3>
-                <p>Registros Totales</p>
-              </div>
-              <div className="stat-card">
-                <h3>{analisis.ciudades_disponibles.length}</h3>
-                <p>Ciudades</p>
-              </div>
-              <div className="stat-card">
-                <h3>{analisis.estadisticas_tiempo.promedio}</h3>
-                <p>Tiempo Promedio (min)</p>
-              </div>
-              <div className="stat-card">
-                <h3>{analisis.estadisticas_tiempo.maximo}</h3>
-                <p>Tiempo Máximo (min)</p>
-              </div>
+            {/* ML Prediction */}
+            {resultados.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Predicción con Machine Learning</CardTitle>
+                  <CardDescription>Compara diferentes modelos predictivos</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <Button onClick={handlePredecir} disabled={loading} variant="secondary">
+                    {loading ? 'Prediciendo...' : 'Predecir con ML'}
+                  </Button>
+
+                  {prediccion && (
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div className="p-4 bg-muted rounded-lg">
+                        <div className="text-sm text-muted-foreground">Tiempo Predicho</div>
+                        <div className="text-3xl font-bold">{prediccion.tiempo_predicho} min</div>
+                        <div className="flex gap-2 mt-2">
+                          <Badge variant={prediccion.confianza === 'Alta' ? 'success' : prediccion.confianza === 'Media' ? 'info' : 'warning'}>
+                            Confianza: {prediccion.confianza}
+                          </Badge>
+                          <Badge variant="outline">{prediccion.modelo_usado}</Badge>
+                        </div>
+                      </div>
+
+                      {comparacionML && (
+                        <div className="space-y-2">
+                          <div className="text-sm font-medium">Comparación de Modelos</div>
+                          {Object.entries(comparacionML).map(([modelo, datos]) => (
+                            <div key={modelo} className="flex justify-between items-center text-sm">
+                              <span className="capitalize">{modelo.replace('_', ' ')}</span>
+                              <Badge variant="outline">{datos.tiempo_predicho?.toFixed(1)} min</Badge>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+          </TabsContent>
+
+          {/* Tab: Análisis */}
+          <TabsContent value="analisis" className="space-y-6">
+            <StatsCards stats={analisis} />
+
+            <div className="grid md:grid-cols-2 gap-6">
+              <TrafficChart data={analisis?.estadisticas_trafico} />
+              <TimeDistributionChart stats={analisis?.estadisticas_tiempo} />
             </div>
 
-            <div style={{ marginTop: '2rem' }}>
-              <h3>Estadísticas de Tráfico</h3>
-              <table className="comparacion-table">
-                <thead>
-                  <tr>
-                    <th>Nivel</th>
-                    <th>Frecuencia</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {Object.entries(analisis.estadisticas_trafico).map(([nivel, frecuencia]) => (
-                    <tr key={nivel}>
-                      <td>{nivel}</td>
-                      <td>{frecuencia}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+            <div className="grid md:grid-cols-2 gap-6">
+              <StreetsByCityChart data={analisis?.calles_por_ciudad} />
+              <MLMetricsChart metricas={metricasML?.modelos} />
             </div>
 
-            <div style={{ marginTop: '2rem' }}>
-              <h3>Calles por Ciudad</h3>
-              <table className="comparacion-table">
-                <thead>
-                  <tr>
-                    <th>Ciudad</th>
-                    <th>Número de Calles</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {Object.entries(analisis.calles_por_ciudad).map(([ciudad, numCalles]) => (
-                    <tr key={ciudad}>
-                      <td>{ciudad}</td>
-                      <td>{numCalles}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
-      </div>
+            <RecentRecordsTable registros={analisis?.registros_recientes} />
+          </TabsContent>
+        </Tabs>
+      </main>
+
+      {/* Footer */}
+      <footer className="border-t py-6 mt-12">
+        <div className="container text-center text-sm text-muted-foreground">
+          Sistema de Movilidad Urbana Guatemala • IA para optimización de rutas
+        </div>
+      </footer>
     </div>
   );
 }
 
-export default App;
+export default function App() {
+  return (
+    <ThemeProvider>
+      <AppContent />
+    </ThemeProvider>
+  );
+}

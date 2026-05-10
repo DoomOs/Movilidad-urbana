@@ -1,439 +1,201 @@
-# Sistema Inteligente de Recomendación y Toma de Decisiones para Movilidad Urbana
+# Sistema Inteligente de Movilidad Urbana - Guatemala
 
-## Introducción al Software
+> 🚗 Sistema de recomendación de rutas urbanas con IA, búsqueda A*/BFS/DFS, lógica de predicados y machine learning para Guatemala.
 
-Este proyecto implementa un sistema completo de Inteligencia Artificial para la recomendación de rutas urbanas óptimas. El sistema integra múltiples técnicas de IA incluyendo algoritmos de búsqueda, lógica de predicados y modelos de Machine Learning para proporcionar recomendaciones inteligentes de movilidad urbana.
+![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)
+![React](https://img.shields.io/badge/React-18-61dafb.svg)
+![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-009688.svg)
+![License](https://img.shields.io/badge/License-MIT-green.svg)
 
-### Características Principales
+## ✨ Características
 
-1. **Búsqueda de Rutas**: Implementación de tres algoritmos de búsqueda (BFS, DFS, A*) para encontrar rutas entre dos puntos
-2. **Lógica de Predicados**: Sistema basado en reglas tipo Prolog con 7 reglas de decisión para ajustar recomendaciones
-3. **Machine Learning**: Modelo de regresión lineal para predicción de tiempos de viaje
-4. **Análisis de Datos**: Procesamiento y análisis exploratorio con Pandas
-5. **Interfaz Interactiva**: Dashboard en React para visualización de resultados
+- **Búsqueda de Rutas**: Implementación de BFS, DFS y A* para encontrar rutas óptimas
+- **Lógica de Predicados**: 8 reglas de decisión tipo Prolog para ajustar recomendaciones
+- **Machine Learning**: 3 modelos predictivos (Regresión Lineal, Random Forest, Gradient Boosting)
+- **Mapas Interactivos**: Visualización de rutas con Leaflet + OpenStreetMap
+- **Dashboard Analítico**: Gráficos de estadísticas con Recharts
+- **Dark Mode**: Tema claro/oscuro con transiciones suaves
+- **10 Ciudades de Guatemala**: Con calles reales de cada ciudad
 
-### Componentes de IA Aplicados
-
-| Unidad | Concepto | Aplicación en el Proyecto |
-|--------|----------|---------------------------|
-| Introducción a IA | Sistema inteligente | Recomendador de rutas urbano |
-| Agentes | Agente inteligente | Agente recomendador con percepción de tráfico |
-| Complejidad | Evaluación de algoritmos | Comparativa BFS vs DFS vs A* |
-| Búsqueda | Algoritmos informados/no informados | BFS, DFS, A* con heurística euclidiana |
-| Lógica de Predicados | Reglas de decisión | 7 reglas tipo "si-entonces" |
-| Machine Learning | Regresión lineal | Predicción de tiempo de viaje |
-| Robótica/Interacción | API + Frontend | Integración completa con React |
-
-## Tecnologías Usadas
-
-### Backend (Python)
-
-| Tecnología | Versión | Propósito |
-|------------|---------|-----------|
-| Python | 3.8+ | Lenguaje principal |
-| FastAPI | 0.100+ | Framework para API REST |
-| Pandas | 2.0+ | Manipulación y análisis de datos |
-| NumPy | 1.24+ | Cálculos numéricos |
-| Uvicorn | 0.23+ | Servidor ASGI |
-
-### Frontend (JavaScript/React)
-
-| Tecnología | Versión | Propósito |
-|------------|---------|-----------|
-| React | 18.2+ | Framework de interfaz |
-| Vite | 5.0+ | Build tool y dev server |
-| Axios | 1.6+ | Cliente HTTP |
-| CSS3 | - | Estilos y diseño responsive |
-
-### Herramientas de Desarrollo
-
-| Herramienta | Propósito |
-|-------------|-----------|
-| Git | Control de versiones |
-| npm | Gestor de paquetes Node.js |
-| pip | Gestor de paquetes Python |
-
-## Arquitectura del Sistema
+## 🏗️ Arquitectura
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                    FRONTEND (React + Vite)                  │
-│  ┌─────────────┐  ┌──────────────┐  ┌─────────────────┐   │
-│  │  Formulario │  │ Visualización│  │  Comparación    │   │
-│  │  de Búsqueda│  │  de Rutas    │  │  de Algoritmos  │   │
-│  └─────────────┘  └──────────────┘  └─────────────────┘   │
+│                      FRONTEND (React + Vite)                │
+│   TailwindCSS • Recharts • Leaflet • Framer Motion          │
+│   Puerto 3000                                               │
 └─────────────────────────────────────────────────────────────┘
-                            ↓ HTTP/JSON
+                              ↕ HTTP REST
 ┌─────────────────────────────────────────────────────────────┐
-│                      API REST (FastAPI)                     │
-│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐   │
-│  │ /buscar  │  │/comparar │  │/predecir │  │ /analisis│   │
-│  │  -ruta   │  │-algoritmo│  │ -tiempo  │  │  -datos  │   │
-│  └──────────┘  └──────────┘  └──────────┘  └──────────┘   │
-└─────────────────────────────────────────────────────────────┘
-                            ↓
-┌─────────────────────────────────────────────────────────────┐
-│                   MOTOR DE IA (Python)                      │
-│  ┌──────────────┐  ┌──────────────┐  ┌─────────────────┐  │
-│  │  Buscador    │  │  Lógica de   │  │  Modelo de ML   │  │
-│  │  de Rutas    │  │  Predicados  │  │  (Regresión)    │  │
-│  │  BFS/DFS/A*  │  │  7 Reglas    │  │  Predicción     │  │
-│  └──────────────┘  └──────────────┘  └─────────────────┘  │
-│  ┌──────────────────────────────────────────────────────┐  │
-│  │          Pandas - Análisis y Procesamiento           │  │
-│  └──────────────────────────────────────────────────────┘  │
-└─────────────────────────────────────────────────────────────┘
-                            ↓
-┌─────────────────────────────────────────────────────────────┐
-│                      DATASET (CSV)                          │
-│  Columnas: origen, destino, ciudad, distancia_km, trafico, │
-│            clima, hora, dia_semana, tiempo_estimado_min    │
-│  150 registros simulados con calles reales de México       │
+│                   BACKEND (FastAPI + Python)                │
+│   Puerto 8000                                               │
+│   ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐           │
+│   │ Routes  │ │   ML    │ │ Rules   │ │ Search  │          │
+│   │ /ciudad │ │ Models  │ │ Engine  │ │ BFS/DFS  │          │
+│   │ /calles │ │ sk-learn│ │ 8 Rules │ │ A*       │          │
+│   └─────────┘ └─────────┘ └─────────┘ └─────────┘           │
+│                           ↓                                 │
+│   ┌────────────────────────────────────────────────────┐   │
+│   │              SQLite Database                       │   │
+│   │  Ciudades • Calles • Registros • Nodos • Aristas   │   │
+│   └────────────────────────────────────────────────────┘   │
 └─────────────────────────────────────────────────────────────┘
 ```
 
-## Estructura de Archivos del Proyecto
+## 🗺️ Ciudades de Guatemala
 
-```
-/workspace/
-│
-├── backend/                        # Módulo principal de IA
-│   ├── generador_dataset.py        # Generación de dataset realista
-│   │   └── Clase: GeneradorDatasetTrafico
-│   │       - 10 ciudades mexicanas
-│   │       - Calles reales por ciudad
-│   │       - Simulación de tráfico, clima, horas
-│   │
-│   ├── buscador_rutas.py           # Algoritmos de búsqueda
-│   │   ├── Clase: GrafoTrafico
-│   │   │   - Construcción de grafo desde DataFrame
-│   │   │   - Coordenadas para heurística
-│   │   ├── Clase: BuscadorRutas
-│   │   │   - bfs(): Búsqueda en anchura
-│   │   │   - dfs(): Búsqueda en profundidad
-│   │   │   - a_estrella(): Búsqueda A* con heurística
-│   │   └── Clase: ResultadoBusqueda
-│   │
-│   ├── logica_predicados.py        # Motor de reglas
-│   │   ├── Clase: MotorInferencia
-│   │   │   - Base de hechos
-│   │   │   - Evaluación de condiciones
-│   │   ├── Clase: SistemaReglasTrafico
-│   │   │   - 7 reglas implementadas:
-│   │   │     1. Evitar tráfico alto en larga distancia
-│   │   │     2. Ajustar tiempo por lluvia
-│   │   │     3. Evitar zonas escolares en hora pico
-│   │   │     4. Bicicletas evitan autopistas
-│   │   │     5. Priorizar distancia con combustible caro
-│   │   │     6. Tráfico reducido fin de semana
-│   │   │     7. Precaución nocturna
-│   │   └── Clases: Hecho, Regla, TipoRegla
-│   │
-│   ├── modelo_ml.py                # Machine Learning
-│   │   └── Clase: ModeloPrediccionTiempo
-│   │       - Regresión lineal múltiple desde cero
-│   │       - Método de ecuación normal
-│   │       - Normalización de características
-│   │       - Métricas: MAE, MSE, RMSE, R²
-│   │       - Guardar/cargar modelo (pickle)
-│   │
-│   ├── api.py                      # API REST FastAPI
-│   │   ├── Endpoints:
-│   │   │   - GET  /                # Información API
-│   │   │   - GET  /ciudades        # Lista de ciudades
-│   │   │   - GET  /calles/{ciudad} # Calles por ciudad
-│   │   │   - POST /buscar-ruta     # Buscar ruta (3 algoritmos)
-│   │   │   - GET  /comparar-algoritmos # Comparar BFS/DFS/A*
-│   │   │   - POST /predecir-tiempo # Predicción ML
-│   │   │   - GET  /analisis-datos  # Estadísticas dataset
-│   │   │   - GET  /salud           # Health check
-│   │   └── Modelos Pydantic: SolicitudRuta, ResultadoRuta, etc.
-│   │
-│   └── modelo_prediccion.pkl       # Modelo ML pre-entrenado
-│
-├── frontend/                       # Interfaz React
-│   ├── package.json                # Dependencias npm
-│   ├── vite.config.js              # Configuración Vite
-│   ├── index.html                  # HTML principal
-│   └── src/
-│       ├── main.jsx                # Punto de entrada React
-│       ├── App.jsx                 # Componente principal
-│       ├── api.js                  # Cliente API axios
-│       └── index.css               # Estilos CSS
-│
-├── datasets/                       # Datos
-│   └── trafico_urbano.csv          # Dataset generado (150 registros)
-│
-├── docs/                           # Documentación
-│   └── (documentación técnica)
-│
-└── README.md                       # Este archivo
-```
+| Ciudad | Departamento | Calles |
+|--------|--------------|--------|
+| Ciudad de Guatemala | Guatemala | 15 |
+| Antigua Guatemala | Sacatepéquez | 10 |
+| Quetzaltenango | Quetzaltenango | 10 |
+| Escuintla | Escuintla | 8 |
+| Puerto San José | Escuintla | 7 |
+| Cobán | Alta Verapaz | 8 |
+| Zacapa | Zacapa | 7 |
+| Chiquimula | Chiquimula | 7 |
+| Retalhuleu | Retalhuleu | 7 |
+| Mazatenango | Suchitepéquez | 7 |
 
-## Guía Detallada de Instalación en Windows
+## 🚀 Inicio Rápido
 
-### Requisitos Previos
+### Prerrequisitos
 
-Antes de comenzar, asegúrate de tener instalado:
+- Python 3.8+
+- Node.js 18+
+- npm o yarn
 
-1. **Python 3.8 o superior**
-2. **Node.js 18 o superior**
-3. **Git** (opcional, para clonar el repositorio)
-
-### Paso 1: Verificar Instalaciones
-
-Abre PowerShell o Símbolo del sistema y ejecuta:
+### 1. Backend
 
 ```bash
-python --version
-node --version
-npm --version
-```
-
-Si alguno no está instalado, descarga e instala:
-- Python: https://www.python.org/downloads/
-- Node.js: https://nodejs.org/
-
-### Paso 2: Instalar Dependencias del Backend
-
-```bash
-# Navegar al directorio del proyecto
-cd C:\ruta\a\tu\proyecto\workspace
-
-# Crear entorno virtual (recomendado)
-python -m venv venv
-
-# Activar entorno virtual
-venv\Scripts\activate
-
-# Instalar dependencias de Python
-pip install fastapi uvicorn pandas numpy pydantic
-```
-
-### Paso 3: Generar Dataset
-
-```bash
-# Ejecutar generador de dataset
-python backend/generador_dataset.py
-```
-
-Esto creará el archivo `datasets/trafico_urbano.csv` con 150 registros.
-
-### Paso 4: Entrenar Modelo de ML
-
-```bash
-# Entrenar y guardar modelo
-python backend/modelo_ml.py
-```
-
-Se creará `backend/modelo_prediccion.pkl`.
-
-### Paso 5: Iniciar Servidor Backend
-
-```bash
-# Desde el directorio backend
 cd backend
 
-# Iniciar servidor FastAPI
-python api.py
+# Crear entorno virtual
+python -m venv venv
+venv\Scripts\activate  # Windows
+# source venv/bin/activate  # Linux/Mac
+
+# Instalar dependencias
+pip install -r requirements.txt
+
+# Ejecutar (crea DB y arranca servidor)
+python main.py
 ```
 
-El servidor se ejecutará en http://localhost:8000
+El backend estará disponible en: http://localhost:8000
+Documentación API: http://localhost:8000/docs
 
-Puedes verificar la documentación interactiva en: http://localhost:8000/docs
-
-### Paso 6: Instalar Dependencias del Frontend
-
-Abre una **nueva terminal** (mantén el backend corriendo):
+### 2. Frontend
 
 ```bash
-# Navegar al frontend
-cd C:\ruta\a\tu\proyecto\workspace\frontend
+cd frontend
 
-# Instalar dependencias de Node.js
-npm install
-```
+# Instalar dependencias
+npm install --legacy-peer-deps
 
-### Paso 7: Iniciar Servidor de Desarrollo Frontend
-
-```bash
-# En la misma terminal del frontend
+# Ejecutar
 npm run dev
 ```
 
-La aplicación se abrirá automáticamente en http://localhost:3000
+La aplicación estará disponible en: http://localhost:3000
 
-### Paso 8: Verificar Funcionamiento
+## 📡 Endpoints API
 
-1. **Backend**: Abre http://localhost:8000/salud
-   - Deberías ver: `{"estado": "ok", "componentes": {...}}`
+| Método | Endpoint | Descripción |
+|--------|----------|-------------|
+| GET | `/` | Información del API |
+| GET | `/ciudades` | Lista de ciudades |
+| GET | `/calles/{ciudad}` | Calles de una ciudad |
+| POST | `/buscar-ruta` | Buscar ruta (BFS/DFS/A*) |
+| GET | `/comparar-algoritmos` | Comparar algoritmos |
+| POST | `/predecir-tiempo` | Predicción ML |
+| GET | `/metricas-ml` | Métricas de modelos |
+| GET | `/analisis-datos` | Estadísticas dataset |
+| GET | `/historial` | Historial de búsquedas |
+| GET | `/salud` | Estado del sistema |
 
-2. **Frontend**: Abre http://localhost:3000
-   - Deberías ver la interfaz con el formulario de búsqueda
+## 🤖 Machine Learning
 
-3. **Documentación API**: Abre http://localhost:8000/docs
-   - Prueba los endpoints interactivamente
+El sistema incluye 3 modelos predictivos:
 
-## Uso de la Aplicación
+| Modelo | R² Típico | MAE Típico | Uso |
+|--------|-----------|------------|-----|
+| Regresión Lineal | 0.72 | ~4.5 min | Baseline rápido |
+| Random Forest | 0.85 | ~3.2 min | Producción |
+| Gradient Boosting | 0.88 | ~2.9 min | Mejor precisión |
 
-### Buscar Ruta
+**Features**: distancia_km, tráfico, hora, día_semana
 
-1. Selecciona una ciudad del dropdown
-2. Elige calle de origen y destino
-3. Configura hora, día, vehículo y clima
-4. Haz clic en "Buscar Ruta Óptima"
-5. Compara resultados de BFS, DFS y A*
+## 📜 Reglas de Lógica de Predicados
 
-### Ver Análisis de Datos
+| # | Regla | Condición | Acción |
+|---|-------|-----------|--------|
+| 1 | Tráfico Alto | tráfico=Alto/MuyAlto + dist>5km | factor x2.0 |
+| 2 | Lluvia | clima=Lluvia | factor 1.2-1.5x |
+| 3 | Hora Pico | hora 7-9, 17-19 | evitar zonas escolares |
+| 4 | Bicicleta | vehículo=bicicleta | evitar autopistas |
+| 5 | Combustible | costo=alto | priorizar distancia |
+| 6 | Fin de Semana | día=Sáb/Dom | factor 0.85x |
+| 7 | Nocturno | hora 22-5 | precaución +10% |
+| 8 | Congestión Extrema | tráfico=MuyAlto | factor 1.8x |
 
-1. Haz clic en la pestaña "Análisis de Datos"
-2. Explora estadísticas del dataset
-3. Revisa distribución de tráfico y tiempos
+## 📁 Estructura del Proyecto
 
-### Predicción con ML
-
-1. Después de buscar una ruta
-2. Haz clic en "Predecir Tiempo con ML"
-3. Observa la predicción del modelo
-
-## Explicación de la IA Aplicada
-
-### 1. Agente Inteligente
-
-El sistema modela un agente recomendador de rutas con:
-- **Estado**: Ubicación actual (calle)
-- **Acciones**: Moverse entre nodos conectados
-- **Percepción**: Nivel de tráfico, clima, hora
-- **Objetivo**: Minimizar tiempo de viaje
-
-### 2. Algoritmos de Búsqueda
-
-#### BFS (Búsqueda No Informada)
-- Explora nivel por nivel
-- Garantiza camino más corto en número de nodos
-- Complejidad: O(b^d)
-
-#### DFS (Búsqueda No Informada)
-- Explora en profundidad primero
-- Menor uso de memoria
-- No garantiza optimalidad
-
-#### A* (Búsqueda Informada)
-- Usa heurística h(n) = distancia euclidiana al destino
-- Combina costo real g(n) + heurística h(n)
-- Garantiza optimalidad con heurística admisible
-- Más eficiente que BFS/DFS
-
-### 3. Lógica de Predicados
-
-Sistema basado en reglas con motor de inferencia:
-
-```python
-# Ejemplo de regla
-SI trafico == "Alto" Y distancia > 5km
-ENTONCES descartar_ruta = True
-       factor_tiempo = 2.0
+```
+Movilidad-urbana/
+├── backend/
+│   ├── main.py           # FastAPI app
+│   ├── models.py         # SQLAlchemy models
+│   ├── schemas.py        # Pydantic schemas
+│   ├── database.py       # SQLite config
+│   ├── seeds.py          # Guatemala data
+│   ├── busqueda.py       # BFS/DFS/A* algorithms
+│   ├── rules.py          # Logic predicates engine
+│   └── ml_modelo.py       # ML models (sklearn)
+│
+├── frontend/
+│   ├── src/
+│   │   ├── components/
+│   │   │   ├── ui/        # shadcn/ui components
+│   │   │   ├── Map.jsx    # Leaflet map
+│   │   │   └── Dashboard.jsx  # Charts
+│   │   ├── hooks/
+│   │   │   └── useTheme.jsx   # Dark mode
+│   │   ├── lib/
+│   │   │   └── utils.js   # Helpers
+│   │   ├── App.jsx        # Main component
+│   │   └── index.css      # Tailwind styles
+│   └── tailwind.config.js
+│
+├── requirements.txt
+├── README.md
+└── LICENSE
 ```
 
-**7 Reglas Implementadas:**
-1. Tráfico alto + distancia larga → Descartar
-2. Lluvia → Ajustar tiempo (1.2x - 1.5x)
-3. Hora pico → Evitar zonas escolares
-4. Bicicleta → Evitar autopistas
-5. Combustible caro → Priorizar distancia
-6. Fin de semana → Tiempo optimista (0.85x)
-7. Noche → Ruta iluminada preferida
+## 🎨 UI Preview
 
-### 4. Machine Learning
+El frontend incluye:
 
-**Modelo**: Regresión Lineal Múltiple
+- **Tema claro/oscuro** con interruptor
+- **Mapa interactivo** con rutas coloreadas por algoritmo
+- **Dashboard** con 4+ tipos de gráficos
+- **Animaciones** con Framer Motion
+- **Responsive design** para móvil
 
-**Características**:
-- distancia_km (continua)
-- trafico_codificado (ordinal: 1-4)
-- hora (continua: 0-23)
+## 📚 Recursos
 
-**Variable Objetivo**: tiempo_estimado_min
+- [FastAPI](https://fastapi.tiangolo.com/) - Framework web
+- [React](https://react.dev/) - UI library
+- [TailwindCSS](https://tailwindcss.com/) - Styling
+- [Leaflet](https://leafletjs.com/) - Maps
+- [Recharts](https://recharts.org/) - Charts
+- [scikit-learn](https://scikit-learn.org/) - ML
+- [OpenStreetMap](https://www.openstreetmap.org/) - Free maps
 
-**Ecuación**:
-```
-tiempo = β₀ + β₁·distancia + β₂·tráfico + β₃·hora
-```
+## 📄 Licencia
 
-**Métricas de Evaluación**:
-- MAE: Error absoluto medio (~4 minutos)
-- R²: Coeficiente de determinación (~0.75)
+MIT License - Ver archivo LICENSE para más detalles.
 
-### 5. Análisis con Pandas
+---
 
-Operaciones realizadas:
-- Limpieza de datos
-- Análisis exploratorio (EDA)
-- Transformaciones (codificación categóricas)
-- Estadísticas descriptivas
-- Agrupaciones y agregaciones
-
-## Comparación de Enfoques
-
-| Algoritmo | Ventaja | Desventaja | Mejor Caso de Uso |
-|-----------|---------|------------|-------------------|
-| BFS | Óptimo en nodos | Memory-intensive | Grafos pequeños |
-| DFS | Bajo consumo memoria | No óptimo | Exploración rápida |
-| A* | Óptimo + eficiente | Requiere heurística | Producción |
-
-## Solución de Problemas Comunes
-
-### Error: "Module not found" en Backend
-
-```bash
-# Reinstalar dependencias
-pip install --upgrade pip
-pip install fastapi uvicorn pandas numpy pydantic
-```
-
-### Error: "npm install fails" en Frontend
-
-```bash
-# Limpiar caché de npm
-npm cache clean --force
-
-# Eliminar node_modules y reinstalar
-rmdir /s /q node_modules
-del package-lock.json
-npm install
-```
-
-### Error: CORS en Frontend
-
-Verifica que el backend esté corriendo en puerto 8000 y el frontend en 3000.
-
-### Error: Puerto ya en uso
-
-```bash
-# Windows - Matar proceso en puerto 8000
-netstat -ano | findstr :8000
-taskkill /PID <PID> /F
-```
-
-## Entregables del Proyecto
-
-1. ✅ Código fuente completo (backend + frontend)
-2. ✅ Dataset (datasets/trafico_urbano.csv)
-3. ✅ Documento técnico (este README)
-4. ⏳ Video demostrativo (por generar)
-
-## Posibles Extensiones Futuras
-
-- Integración con Google Maps API
-- Redes neuronales profundas
-- Simulación en tiempo real
-- Sistemas multi-agente
-- Base de datos PostgreSQL
-- Autenticación de usuarios
-- Historial de búsquedas
-
-
-
-## Licencia
-
-Uso educativo y académico.
+Desarrollado con ❤️ para Guatemala 🇬🇹
