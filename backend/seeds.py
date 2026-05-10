@@ -131,6 +131,35 @@ CALLES_GUATEMALA = {
 }
 
 
+# Carreteras interurbanas de Guatemala (aproximadas, basadas en rutas reales)
+# Cada entrada: (ciudad_origen, ciudad_destino, distancia_km, tipo_carretera)
+CARRETERAS_INTERURBANAS = [
+    # Corridor CA-1 (Franja transversal)
+    ("Ciudad de Guatemala", "Antigua Guatemala", 44, "carretera_montana"),
+    ("Antigua Guatemala", "Escuintla", 26, "carretera_principal"),
+    ("Escuintla", "Mazatenango", 35, "carretera_principal"),
+    ("Mazatenango", "Quetzaltenango", 33, "carretera_principal"),
+    ("Quetzaltenango", "Retalhuleu", 28, "carretera_principal"),
+
+    # Corridor CA-2 (Ruta costera)
+    ("Ciudad de Guatemala", "Escuintla", 45, "carretera_principal"),
+    ("Escuintla", "Puerto San José", 24, "carretera_costanera"),
+
+    # Corridor a Cobán (Norte)
+    ("Ciudad de Guatemala", "Cobán", 112, "carretera_montana"),
+
+    # Corridor a Zacapa/Chiquimula (Oriente)
+    ("Ciudad de Guatemala", "Zacapa", 146, "carretera_principal"),
+    ("Zacapa", "Chiquimula", 60, "carretera_principal"),
+
+    # Conexiones secundarias
+    ("Antigua Guatemala", "Quetzaltenango", 85, "carretera_montana"),
+    ("Quetzaltenango", "Cobán", 95, "carretera_montana"),
+    ("Mazatenango", "Retalhuleu", 18, "carretera_principal"),
+    ("Puerto San José", "Escuintla", 24, "carretera_costanera"),
+]
+
+
 def seed_database():
     """Poblar la base de datos con datos de Guatemala."""
     db = SessionLocal()
@@ -305,7 +334,7 @@ def seed_database():
         db.commit()
         print(f"  {total_registros} registros de tráfico creados.\n")
 
-        print("Construyendo grafo de nodos y aristas...")
+        print("Construyendo grafo de nodos y aristas (intra-ciudad)...")
 
         # Crear nodos y aristas para el grafo
         nodos_creados = 0
@@ -378,15 +407,84 @@ def seed_database():
                     aristas_creadas += 1
 
         db.commit()
-        print(f"  {nodos_creados} nodos creados.")
-        print(f"  {len(aristas_set)} aristas creadas (bidireccionales).\n")
+        print(f"  {nodos_creados} nodos intra-ciudad creados.")
+        print(f"  {aristas_creadas} aristas intra-ciudad creadas.\n")
 
-        print("=== Base de datos Guatemala lista ===")
+        print("Creando nodos ciudad (inter-ciudad)...")
+
+        # Crear nodo especial para cada ciudad (para conexiones interurbanas)
+        nodos_ciudad_map = {}
+        for ciudad_nombre, ciudad in ciudades_map.items():
+            nodo_ciudad = Nodo(
+                nombre=f"CIUDAD_{ciudad_nombre}",  # Prefijo para identificar nodos ciudad
+                ciudad_id=ciudad.id,
+                latitud=ciudad.latitud,
+                longitud=ciudad.longitud
+            )
+            db.add(nodo_ciudad)
+            db.flush()
+            nodos_ciudad_map[ciudad_nombre] = nodo_ciudad
+            nodos_creados += 1
+
+        db.commit()
+        print(f"  {len(nodos_ciudad_map)} nodos ciudad creados.\n")
+
+        print("Creando aristas inter-urbanas...")
+
+        # Crear aristas entre ciudades basadas en carreteras reales
+        aristas_interurbanas = 0
+        for origen_nombre, destino_nombre, distancia, tipo in CARRETERAS_INTERURBANAS:
+            if origen_nombre not in nodos_ciudad_map or destino_nombre not in nodos_ciudad_map:
+                print(f"  ! No se encontró nodo para {origen_nombre} -> {destino_nombre}")
+                continue
+
+            nodo_origen = nodos_ciudad_map[origen_nombre]
+            nodo_destino = nodos_ciudad_map[destino_nombre]
+
+            # Calcular tiempo basado en distancia y tipo de carretera
+            velocidades_tipo = {
+                "carretera_principal": 60,
+                "carretera_montana": 40,
+                "carretera_costanera": 50
+            }
+            velocidad = velocidades_tipo.get(tipo, 45)
+            tiempo_horas = distancia / velocidad
+            tiempo_min = tiempo_horas * 60
+
+            # Determinar tráfico típico para carretera interurbana
+            trafico = NivelTrafico.MEDIO
+
+            # Crear arista origen -> destino
+            arista = Arista(
+                nodo_origen_id=nodo_origen.id,
+                nodo_destino_id=nodo_destino.id,
+                distancia_km=distancia,
+                tiempo_min=round(tiempo_min, 2),
+                trafico=trafico
+            )
+            db.add(arista)
+
+            # Crear arista bidireccional
+            arista_inv = Arista(
+                nodo_origen_id=nodo_destino.id,
+                nodo_destino_id=nodo_origen.id,
+                distancia_km=distancia,
+                tiempo_min=round(tiempo_min, 2),
+                trafico=trafico
+            )
+            db.add(arista_inv)
+            aristas_interurbanas += 1
+
+            print(f"  + {origen_nombre} <-> {destino_nombre}: {distancia} km")
+
+        db.commit()
+
+        print(f"\n=== Base de datos Guatemala lista ===")
         print(f"  Ciudades: {len(ciudades_map)}")
         print(f"  Calles: {sum(len(c) for c in calles_map.values())}")
         print(f"  Registros: {total_registros}")
-        print(f"  Nodos: {nodos_creados}")
-        print(f"  Aristas: {aristas_creadas}")
+        print(f"  Nodos: {nodos_creados} (intra: {nodos_creados - len(nodos_ciudad_map)}, ciudad: {len(nodos_ciudad_map)})")
+        print(f"  Aristas: {aristas_creadas + aristas_interurbanas * 2} (intra: {aristas_creadas}, inter: {aristas_interurbanas * 2})")
 
     except Exception as e:
         print(f"Error durante el seed: {e}")

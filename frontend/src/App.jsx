@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { ThemeProvider, useTheme } from './hooks/useTheme';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from './components/ui/card';
@@ -6,15 +6,18 @@ import { Button } from './components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './components/ui/select';
 import { Badge } from './components/ui/badge';
 import { Switch } from './components/ui/switch';
-import { Sun, Moon, Navigation, BarChart3, AlertTriangle } from 'lucide-react';
+import { Sun, Moon, Navigation, BarChart3, AlertTriangle, Map } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 import {
   obtenerCiudades, obtenerCalles, buscarRuta, predecirTiempo,
-  compararModelos, obtenerAnalisis, obtenerMetricasML
+  compararModelos, obtenerAnalisis, obtenerMetricasML, obtenerGrafoCompleto
 } from './api';
 import { StatsCards, TrafficChart, TimeDistributionChart, StreetsByCityChart, MLMetricsChart } from './components/Dashboard';
 import RouteNodes from './components/RouteNodes';
+import GrafoVisual from './components/GrafoVisual';
+
+const CityMap = lazy(() => import('./components/CityMap'));
 
 const DIAS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
 const CLIMAS = ['Despejado', 'Nublado', 'Lluvia Ligera', 'Lluvia Intensa'];
@@ -55,18 +58,22 @@ export default function App() {
   const [comparacionML, setComparacionML] = useState(null);
   const [algoSeleccionado, setAlgoSeleccionado] = useState(null);
 
+  const [grafoCompleto, setGrafoCompleto] = useState(null);
+
   // Cargar datos iniciales
   useEffect(() => {
     async function init() {
       try {
-        const [cities, data, m] = await Promise.all([
+        const [cities, data, m, grafo] = await Promise.all([
           obtenerCiudades(),
           obtenerAnalisis(),
-          obtenerMetricasML().catch(() => null)
+          obtenerMetricasML().catch(() => null),
+          obtenerGrafoCompleto().catch(() => null)
         ]);
         setCiudades(cities);
         setAnalisis(data);
         setMetricas(m);
+        setGrafoCompleto(grafo);
         if (cities.length > 0) setCiudad(cities[0].nombre);
       } catch (err) {
         console.error('Error init:', err);
@@ -182,10 +189,14 @@ export default function App() {
 
         {/* Tabs */}
         <Tabs value={tab} onValueChange={setTab} className="space-y-4">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="buscar" className="gap-1.5 text-xs">
               <Navigation className="h-3 w-3" />
               Buscar Ruta
+            </TabsTrigger>
+            <TabsTrigger value="mapa" className="gap-1.5 text-xs">
+              <Map className="h-3 w-3" />
+              Mapa
             </TabsTrigger>
             <TabsTrigger value="analisis" className="gap-1.5 text-xs">
               <BarChart3 className="h-3 w-3" />
@@ -193,128 +204,30 @@ export default function App() {
             </TabsTrigger>
           </TabsList>
 
-          {/* Tab: Buscar */}
+{/* Tab: Buscar */}
           <TabsContent value="buscar" className="space-y-4">
-            <div className="grid lg:grid-cols-2 gap-4">
-              {/* Formulario */}
+            {/* Route Nodes Visualization - Resultados de ruta */}
+            <RouteNodes
+              resultados={resultados}
+              selectedAlgorithm={algoSeleccionado}
+              ciudad={ciudad}
+            />
+
+            {/* Mensaje para ir al mapa */}
+            {resultados.length === 0 && (
               <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-base">Parámetros del Viaje</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {/* Ciudad */}
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-medium text-muted-foreground">Ciudad</label>
-                    <Select value={ciudad} onValueChange={setCiudad}>
-                      <SelectTrigger className="h-9">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {ciudades.map(c => (
-                          <SelectItem key={c.id} value={c.nombre}>{c.nombre}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  {/* Origen y Destino */}
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="space-y-1.5">
-                      <label className="text-xs font-medium text-muted-foreground">Origen</label>
-                      <Select value={origen} onValueChange={setOrigen}>
-                        <SelectTrigger className="h-9">
-                          <SelectValue placeholder="Origen" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {calles.map(c => (
-                            <SelectItem key={c} value={c}>{c}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-1.5">
-                      <label className="text-xs font-medium text-muted-foreground">Destino</label>
-                      <Select value={destino} onValueChange={setDestino}>
-                        <SelectTrigger className="h-9">
-                          <SelectValue placeholder="Destino" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {calles.map(c => (
-                            <SelectItem key={c} value={c}>{c}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-
-                  {/* Hora */}
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-medium text-muted-foreground">
-                      Hora: <span className="text-primary font-bold">{hora}:00</span>
-                    </label>
-                    <input type="range" min="0" max="23" value={hora} onChange={e => setHora(+e.target.value)} className="w-full" />
-                    <div className="flex justify-between text-[10px] text-muted-foreground">
-                      <span>0h</span><span>6h</span><span>12h</span><span>18h</span><span>23h</span>
-                    </div>
-                  </div>
-
-                  {/* Día y Vehículo */}
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="space-y-1.5">
-                      <label className="text-xs font-medium text-muted-foreground">Día</label>
-                      <Select value={dia} onValueChange={setDia}>
-                        <SelectTrigger className="h-9">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {DIAS.map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-1.5">
-                      <label className="text-xs font-medium text-muted-foreground">Vehículo</label>
-                      <Select value={vehiculo} onValueChange={setVehiculo}>
-                        <SelectTrigger className="h-9">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {VEHICULOS.map(v => <SelectItem key={v.value} value={v.value}>{v.label}</SelectItem>)}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-
-                  {/* Clima */}
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-medium text-muted-foreground">Clima</label>
-                    <Select value={clima} onValueChange={setClima}>
-                      <SelectTrigger className="h-9">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {CLIMAS.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <Button onClick={handleBuscar} disabled={loading} className="w-full" size="sm">
-                    {loading ? 'Buscando...' : 'Buscar Ruta'}
-                  </Button>
+                <CardContent className="py-8 text-center text-muted-foreground">
+                  <Map className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                  <p className="text-sm">Ve al tab "Mapa" para seleccionar origen y destino</p>
+                  <p className="text-xs mt-1">Los resultados aparecerán aquí</p>
                 </CardContent>
               </Card>
-
-              {/* Route Nodes Visualization */}
-              <RouteNodes
-                resultados={resultados}
-                selectedAlgorithm={algoSeleccionado}
-                ciudad={ciudad}
-              />
-            </div>
+            )}
 
             {/* Resultados Cards */}
             {resultados.length > 0 && (
               <div className="space-y-3">
-                <h3 className="text-sm font-medium text-muted-foreground">Resultados</h3>
+                <h3 className="text-sm font-medium text-muted-foreground">Resultados de Ruta</h3>
                 <div className="grid sm:grid-cols-3 gap-3">
                   {resultados.map((r) => {
                     const isBest = r.algoritmo === mejor?.algoritmo;
@@ -360,46 +273,44 @@ export default function App() {
                     );
                   })}
                 </div>
-
-                {/* ML Prediction */}
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-sm">Predicción con Machine Learning</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    <Button onClick={handlePredecir} disabled={loading} variant="secondary" size="sm">
-                      {loading ? 'Procesando...' : 'Predecir Tiempo'}
-                    </Button>
-
-                    {prediccion && (
-                      <div className="grid sm:grid-cols-2 gap-4">
-                        <div className="p-3 bg-muted rounded-lg">
-                          <p className="text-[10px] text-muted-foreground mb-1">Tiempo Predicho</p>
-                          <p className="text-2xl font-bold">{prediccion.tiempo_predicho} <span className="text-sm font-normal">min</span></p>
-                          <div className="flex gap-2 mt-2">
-                            <Badge variant={prediccion.confianza === 'Alta' ? 'success' : prediccion.confianza === 'Media' ? 'info' : 'warning'} className="text-[10px]">
-                              {prediccion.confianza}
-                            </Badge>
-                            <Badge variant="outline" className="text-[10px]">{prediccion.modelo_usado}</Badge>
-                          </div>
-                        </div>
-
-                        {comparacionML && (
-                          <div className="space-y-1.5">
-                            <p className="text-xs font-medium text-muted-foreground">Comparación de Modelos</p>
-                            {Object.entries(comparacionML).map(([modelo, datos]) => (
-                              <div key={modelo} className="flex justify-between items-center text-xs">
-                                <span className="capitalize">{modelo.replace('_', ' ')}</span>
-                                <Badge variant="outline" className="text-[10px]">{datos.tiempo_predicho?.toFixed(1)} min</Badge>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
               </div>
+            )}
+          </TabsContent>
+
+          {/* Tab: Mapa */}
+          <TabsContent value="mapa" className="space-y-4">
+            {grafoCompleto ? (
+              <GrafoVisual
+                datosGrafo={grafoCompleto}
+                onBuscarRutaInterurbana={async (origen, destino) => {
+                  try {
+                    const resultadosRuta = await buscarRuta({
+                      origen,
+                      destino,
+                      ciudad: null,
+                      hora,
+                      dia_semana: dia,
+                      tipo_vehiculo: vehiculo,
+                      clima
+                    });
+                    if (resultadosRuta && resultadosRuta.length > 0) {
+                      setResultados(resultadosRuta);
+                      setAlgoSeleccionado(resultadosRuta[0].algoritmo);
+                      setTab('buscar'); // Volver a la pestaña de resultados
+                      return resultadosRuta[0];
+                    }
+                  } catch (err) {
+                    console.error('Error buscando ruta inter-urbana:', err);
+                  }
+                  return null;
+                }}
+              />
+            ) : (
+              <Card>
+                <CardContent className="py-8 text-center text-muted-foreground">
+                  Cargando mapa...
+                </CardContent>
+              </Card>
             )}
           </TabsContent>
 

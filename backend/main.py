@@ -177,6 +177,57 @@ async def get_ciudades(db: Session = Depends(get_db)):
     return result
 
 
+@app.get("/grafo-completo", tags=["Datos"])
+async def get_grafo_completo(db: Session = Depends(get_db)):
+    """Obtener el grafo completo con nodos ciudad y aristas inter-urbanas."""
+    from models import Nodo, Arista
+
+    # Obtener todas las ciudades
+    ciudades = db.query(Ciudad).all()
+
+    # Obtener nodos (incluyendo nodos ciudad que empiezan con "CIUDAD_")
+    nodos = db.query(Nodo).all()
+
+    # Obtener aristas
+    aristas = db.query(Arista).all()
+
+    # Construir respuesta
+    nodos_list = []
+    for n in nodos:
+        ciudad = next((c for c in ciudades if c.id == n.ciudad_id), None)
+        es_nodo_ciudad = n.nombre.startswith("CIUDAD_")
+        nodos_list.append({
+            "id": n.id,
+            "nombre": n.nombre,
+            "lat": n.latitud or 0,
+            "lng": n.longitud or 0,
+            "ciudad": ciudad.nombre if ciudad else "Desconocida",
+            "es_ciudad": es_nodo_ciudad,
+            "tipo": "ciudad" if es_nodo_ciudad else "calle"
+        })
+
+    aristas_list = []
+    for a in aristas:
+        nodo_origen = next((n for n in nodos if n.id == a.nodo_origen_id), None)
+        nodo_destino = next((n for n in nodos if n.id == a.nodo_destino_id), None)
+        if nodo_origen and nodo_destino:
+            aristas_list.append({
+                "origen": nodo_origen.nombre,
+                "destino": nodo_destino.nombre,
+                "distancia_km": a.distancia_km,
+                "tiempo_min": a.tiempo_min,
+                "trafico": a.trafico.value if hasattr(a.trafico, 'value') else a.trafico
+            })
+
+    return {
+        "nodos": nodos_list,
+        "aristas": aristas_list,
+        "ciudades": [c.nombre for c in ciudades],
+        "total_nodos": len(nodos_list),
+        "total_aristas": len(aristas_list)
+    }
+
+
 @app.get("/calles/{ciudad}", tags=["Datos"])
 async def get_calles_ciudad(ciudad: str, db: Session = Depends(get_db)):
     """Obtener todas las calles de una ciudad."""

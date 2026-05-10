@@ -62,4 +62,9 @@ export const verificarSalud = async () => {
   return response.data;
 };
 
+export const obtenerGrafoCompleto = async () => {
+  const response = await api.get('/grafo-completo');
+  return response.data;
+};
+
 export default api;
